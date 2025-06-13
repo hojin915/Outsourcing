@@ -1,8 +1,12 @@
 package com.example.outsourcing.user.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
+@NoArgsConstructor
 @Table(name = "users")
 public class User {
     @Id
@@ -12,6 +16,14 @@ public class User {
     private String username;
     private String email;
     private String password;
+    private String name;
+
+    public User(String username, String email, String password, String name) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.name = name;
+    }
 
     // image
 
