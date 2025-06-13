@@ -1,6 +1,6 @@
 package com.example.outsourcing.comment.entity;
 
-import com.example.outsourcing.member.entity.Member;
+import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.task.entity.Task;
 import jakarta.persistence.*;
 
@@ -13,8 +13,8 @@ public class Comment {
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)

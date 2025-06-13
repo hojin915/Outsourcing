@@ -1,10 +1,10 @@
-package com.example.outsourcing.member.entity;
+package com.example.outsourcing.user.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "members")
-public class Member {
+@Table(name = "users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
