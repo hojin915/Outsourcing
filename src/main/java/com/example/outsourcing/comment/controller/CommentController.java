@@ -56,11 +56,15 @@ public class CommentController {
 
     // 댓글 단건 조회 컨트롤러
     @GetMapping("/comment/{comment_id}")
-    public ResponseEntity<CommentResponseDto> commentFindById (@PathVariable("comment_id") Long commentId) {
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentFindById (@PathVariable("comment_id") Long commentId) {
 
-        commentService.commentFindById(commentId);
+        CommentDataDto commentFindById = commentService.commentFindById(commentId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
+                "댓글 단건 조회가 완료되었습니다.",
+                commentFindById);
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     // 댓글 수정 컨트롤러
