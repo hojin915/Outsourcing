@@ -1,12 +1,13 @@
 package com.example.outsourcing.comment.entity;
 
+import com.example.outsourcing.common.entity.SoftDeleteEntity;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.task.entity.Task;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "comments")
-public class Comment {
+public class Comment extends SoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
