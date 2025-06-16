@@ -4,18 +4,13 @@ import com.example.outsourcing.common.entity.SoftDeleteEntity;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.task.entity.Task;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
 @Entity
 @Table(name = "comments")
 public class Comment extends SoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long commentId;
-
-    @Setter
+    private Long id;
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,13 +21,6 @@ public class Comment extends SoftDeleteEntity {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-
-    public Comment() {}
-
-    // Comment객체 생성자
-    public Comment(Task task, User user,String comment) {
-        this.task = task;
-        this.user = user;
-        this.comment = comment;
-    }
+    // 생성일/수정일 추가
+    // isDeleted/deletedAt 추가
 }
