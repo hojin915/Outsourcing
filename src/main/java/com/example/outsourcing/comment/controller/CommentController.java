@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -42,6 +43,14 @@ public class CommentController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    // 댓글 전체 조회 컨트롤러
+    @GetMapping("/{task_id}")
+    public ResponseEntity<List<CommentResponseDto>> commentFindAll (@PathVariable("task_id") Long taskId) {
 
+        // 서비스 레이어의 commentFindAll 메서드 호출
+        commentService.commentFindAll(taskId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.example.outsourcing.comment.dto;
 
+import com.example.outsourcing.comment.entity.Comment;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -32,5 +33,15 @@ public class CommentDataDto {
         this.modifiedAt = modifiedAt;
     }
 
-
+    // 댓글 전체 조회 생성자 (Comment를 CommentDataDto타입으로 변환)
+    public static CommentDataDto toDto(Comment comment) {
+        return new CommentDataDto(
+                comment.getCommentId(),
+                comment.getTask().getId(),
+                comment.getUser().getId(),
+                comment.getComment(),
+                comment.getCreatedAt(),
+                comment.getModifiedAt()
+        );
+    }
 }
