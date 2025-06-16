@@ -43,7 +43,7 @@ public class CommentService {
 
 
         // 댓글 생성할 태스크 호출
-        // 태스크 예외처리 (댓글 생성하려는 태스크가 존재하지 않을 경우)
+        // 현재 태스크 ID로 조회하는 기능이 없습니다. 따라서 로컬에서 임시로 태스크레포에 findById를 생성해뒀습니다. 추후 변경하겠습니다.
         Task task = taskRepository.findById(taskId);
 
         // 댓글 생성
@@ -69,7 +69,7 @@ public class CommentService {
     public List<CommentDataDto> commentFindAll(Long taskId) {
         // 태스크 예외처리 (댓글 조회하려는 태스크가 존재하지 않을 경우)
 
-        return commentRepository.findAllByTaskIdOrderByCreatedAtDesc(taskId)
+        return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(taskId)
                 .stream()
                 .map(CommentDataDto::toDto) // Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
                 .toList();
@@ -79,7 +79,7 @@ public class CommentService {
     @Transactional
     public CommentDataDto commentFindById(Long commentId) {
 
-        Comment findByIdComment = commentRepository.findById(commentId).get();
+        Comment findByIdComment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
         return CommentDataDto.toDto(findByIdComment);
     }
@@ -88,7 +88,7 @@ public class CommentService {
     @Transactional
     public CommentDataDto commentUpdate(Long commentId, String comment) {
 
-        Comment commentUpdate = commentRepository.findById(commentId).get();
+        Comment commentUpdate = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
         commentUpdate.setComment(comment);
 
@@ -99,7 +99,7 @@ public class CommentService {
     @Transactional
     public CommentDeleteDto commentdelete(Long commentId) {
 
-        Comment comment = commentRepository.findById(commentId).get();
+        Comment comment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
         comment.setDeleted(true);
         comment.setDeletedAt(LocalDateTime.now());
