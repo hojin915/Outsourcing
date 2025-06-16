@@ -3,6 +3,7 @@ package com.example.outsourcing.comment.controller;
 import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.service.CommentService;
 import com.example.outsourcing.common.dto.ResponseDto;
+import com.example.outsourcing.common.entity.AuthUser;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,12 +24,12 @@ public class CommentController {
 
     // 댓글 생성 컨트롤러
     @PostMapping("/{task_id}")
-    public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated (@AuthenticationPrincipal(expression = "username") String username,
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated (@AuthenticationPrincipal AuthUser user,
                                                                 @PathVariable("task_id") Long taskId,
                                                                 @RequestBody CommentRequestDto requestDto) {
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
-        CommentDataDto response = commentService.commentCreated(username, taskId, requestDto.getComment());
+        CommentDataDto response = commentService.commentCreated(user.getId(), taskId, requestDto.getComment());
 
         // response객체 생성
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(

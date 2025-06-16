@@ -34,10 +34,10 @@ public class CommentService {
 
     // 댓글 생성 비지니스 로직
     @Transactional
-    public CommentDataDto commentCreated(String username, Long taskId, String comment) {
+    public CommentDataDto commentCreated(Long userId, Long taskId, String comment) {
 
         // 유저 예외처리
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException()
                 );
 
