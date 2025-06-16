@@ -64,6 +64,10 @@ public class JwtUtil {
                 .getBody();
     }
 
+    public Long getUserIdFromToken(String token) {
+        return Long.parseLong(extractClaims(token).getSubject());
+    }
+
     public String getUsernameFromToken(String token) {
         return extractClaims(token).get("username", String.class);
     }
