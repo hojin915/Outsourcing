@@ -5,6 +5,7 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Entity
@@ -13,6 +14,8 @@ public class Comment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
+
+    @Setter
     private String comment;
 
     @ManyToOne(fetch = FetchType.LAZY)

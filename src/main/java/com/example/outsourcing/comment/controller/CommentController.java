@@ -5,7 +5,6 @@ import com.example.outsourcing.comment.dto.CommentFindAllResponseDto;
 import com.example.outsourcing.comment.dto.CommentRequestDto;
 import com.example.outsourcing.comment.dto.CommentResponseDto;
 import com.example.outsourcing.comment.service.CommentService;
-import com.example.outsourcing.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -72,5 +71,21 @@ public class CommentController {
         commentService.commentFindById(commentId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // 댓글 수정 컨트롤러
+    @PatchMapping("/{comment_id}")
+    public ResponseEntity<CommentResponseDto> commentUpdate (@PathVariable("comment_id") Long commentId,
+                                                             @RequestBody CommentRequestDto requestDto) {
+
+        CommentDataDto response = commentService.commentUpdate(commentId, requestDto.getComment());
+
+        CommentResponseDto responseDto = new CommentResponseDto(
+                true,
+                "댓글 수정이 완료되었습니다.",
+                response,
+                LocalDateTime.now());
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

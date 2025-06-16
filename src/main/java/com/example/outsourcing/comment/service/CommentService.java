@@ -81,4 +81,15 @@ public class CommentService {
 
         return CommentDataDto.toDto(findByIdComment);
     }
+
+    // 댓글 수정 비지니스 로직
+    @Transactional
+    public CommentDataDto commentUpdate(Long commentId, String comment) {
+
+        Comment commentUpdate = commentRepository.findById(commentId).get();
+
+        commentUpdate.setComment(comment);
+
+        return CommentDataDto.toDto(commentUpdate);
+    }
 }
