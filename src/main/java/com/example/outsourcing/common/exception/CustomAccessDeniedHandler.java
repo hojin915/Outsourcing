@@ -13,7 +13,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -27,11 +26,8 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         HttpStatus status = HttpStatus.FORBIDDEN;
 
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                false,
                 "AccessDenied Uri : " + accessDeniedException.getMessage(),
-                null,
-                status.getReasonPhrase(),
-                LocalDateTime.now().toString()
+                status.getReasonPhrase()
         );
         String responseBody = objectMapper.writeValueAsString(errorResponseDto);
 

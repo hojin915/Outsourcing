@@ -1,16 +1,16 @@
 package com.example.outsourcing.common.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class ErrorResponseDto {
+public class ErrorResponseDto extends ResponseDto<Void> {
 
-    private final boolean success;
-    private final String message;
-    private final String data;
     private final String errorCode;
-    private final String timestamp;
+
+    public ErrorResponseDto(String message, String errorCode) {
+        super(message, null);
+        this.success = false;
+        this.errorCode = errorCode;
+    }
 
 }
