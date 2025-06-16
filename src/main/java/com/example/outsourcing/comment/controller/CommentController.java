@@ -63,4 +63,12 @@ public class CommentController {
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
+    // 댓글 단건 조회 컨트롤러
+    @GetMapping("/{comment_id}")
+    public ResponseEntity<CommentResponseDto> commentFindById (@PathVariable("comment_id") Long commentId) {
+
+        commentService.commentFindById(commentId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

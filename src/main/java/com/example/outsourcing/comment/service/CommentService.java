@@ -61,4 +61,12 @@ public class CommentService {
                 .toList();
     }
 
+    // 댓글 단건 조회 비지니스 로직
+    @Transactional
+    public CommentDataDto commentFindById(Long commentId) {
+
+        Comment findByIdComment = commentRepository.findById(commentId).get();
+
+        return CommentDataDto.toDto(findByIdComment);
+    }
 }
