@@ -1,5 +1,6 @@
 package com.example.outsourcing.user.controller;
 
+import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
@@ -23,33 +24,42 @@ public class UserController {
     private final UserService userService;
     // Todo 공통 Response 완료시 응답 적용하기
     @PostMapping("/register")
-    public ResponseEntity<UserSignupResponseDto> signup(
+    public ResponseEntity<ResponseDto<UserSignupResponseDto>> signup(
             @Valid @RequestBody UserSignupRequestDto requestDto
     ){
         UserSignupResponseDto responseDto = userService.signup(requestDto);
         URI location = URI.create("/api/users/" + responseDto.getId());
-        return ResponseEntity.created(location).body(responseDto);
+
+        ResponseDto<UserSignupResponseDto> response = new ResponseDto<>("회원가입이 완료되었습니다.", responseDto);
+        return ResponseEntity.created(location).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDto> login(
+    public ResponseEntity<ResponseDto<UserLoginResponseDto>> login(
             @Valid @RequestBody UserLoginRequestDto requestDto
     ){
-        return ResponseEntity.ok(userService.login(requestDto));
+        UserLoginResponseDto responseDto = userService.login(requestDto);
+
+        ResponseDto<UserLoginResponseDto> response = new ResponseDto<>("로그인이 완료되었습니다.", responseDto);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserProfileResponseDto> profile(
+    public ResponseEntity<ResponseDto<UserProfileResponseDto>> profile(
             @AuthenticationPrincipal(expression = "username") String username
     ){
-        return ResponseEntity.ok(userService.getProfile(username));
+        UserProfileResponseDto responseDto = userService.getProfile(username);
+        ResponseDto<UserProfileResponseDto> response = new ResponseDto<>("프로필 조회에 성공했습니다.", responseDto);
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<ResponseDto<Void>> delete(
             @AuthenticationPrincipal(expression = "username") String username
     ){
         userService.delete(username);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        ResponseDto<Void> response = new ResponseDto<>("회원탈퇴가 완료되었습니다", null);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -7,6 +7,7 @@ import com.example.outsourcing.task.entity.Task;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
+@Where(clause = "")
 @Table(name = "users")
 public class User extends SoftDeleteEntity {
     @Id

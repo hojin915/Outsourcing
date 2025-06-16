@@ -1,5 +1,6 @@
 package com.example.outsourcing.common.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class SoftDeleteEntity extends BaseEntity{
+    @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
     private LocalDateTime deletedAt;
 
