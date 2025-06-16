@@ -51,7 +51,7 @@ public class CommentDeleteDto {
                 comment.getUser().getUsername(),
                 comment.getComment(),
                 comment.getCreatedAt(),
-                comment.getModifiedAt(),
+                comment.getUpdatedAt(),
                 comment.isDeleted(),
                 comment.getDeletedAt()
         );

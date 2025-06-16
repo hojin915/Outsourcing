@@ -43,8 +43,8 @@ public class CommentService {
 
 
         // 댓글 생성할 태스크 호출
-        // 현재 태스크 ID로 조회하는 기능이 없습니다. 따라서 로컬에서 임시로 태스크레포에 findById를 생성해뒀습니다. 추후 변경하겠습니다.
-        Task task = taskRepository.findById(taskId);
+        // 현재 태스크 ID로 조회하는 기능이 없습니다.
+        Task task = taskRepository.findById(taskId).get();
 
         // 댓글 생성
         Comment newComment = new Comment(task, user, comment);
@@ -60,7 +60,7 @@ public class CommentService {
                 newComment.getUser().getUsername(),
                 newComment.getComment(),
                 newComment.getCreatedAt(),
-                newComment.getModifiedAt()
+                newComment.getUpdatedAt()
         );
     }
 

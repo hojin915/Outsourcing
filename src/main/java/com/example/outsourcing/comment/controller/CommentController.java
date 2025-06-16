@@ -2,12 +2,12 @@ package com.example.outsourcing.comment.controller;
 
 import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.service.CommentService;
+import com.example.outsourcing.common.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -23,19 +23,17 @@ public class CommentController {
 
     // 댓글 생성 컨트롤러
     @PostMapping("/{task_id}")
-    public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal(expression = "username") String username,
-                                                              @PathVariable("task_id") Long taskId,
-                                                              @RequestBody CommentRequestDto requestDto) {
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated (@AuthenticationPrincipal(expression = "username") String username,
+                                                                @PathVariable("task_id") Long taskId,
+                                                                @RequestBody CommentRequestDto requestDto) {
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
         CommentDataDto response = commentService.commentCreated(username, taskId, requestDto.getComment());
 
         // response객체 생성
-        CommentResponseDto responseDto = new CommentResponseDto(
-                true,
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 생성이 완료되었습니다.",
-                response,
-                LocalDateTime.now());
+                response);
 
         // 반환
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -43,17 +41,15 @@ public class CommentController {
 
     // 태스크 댓글 전체 조회 컨트롤러
     @GetMapping("/{task_id}")
-    public ResponseEntity<CommentFindAllResponseDto> commentFindAll (@PathVariable("task_id") Long taskId) {
+    public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentFindAll (@PathVariable("task_id") Long taskId) {
 
         // 서비스 레이어의 commentFindAll 메서드 호출
         List<CommentDataDto> commentFindAll = commentService.commentFindAll(taskId);
 
         // response객체 생성
-        CommentFindAllResponseDto responseDto = new CommentFindAllResponseDto(
-                true,
+        ResponseDto<List<CommentDataDto>> responseDto = new ResponseDto<>(
                 "댓글 조회가 완료되었습니다.",
-                commentFindAll,
-                LocalDateTime.now());
+                commentFindAll);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -69,31 +65,27 @@ public class CommentController {
 
     // 댓글 수정 컨트롤러
     @PatchMapping("/{comment_id}")
-    public ResponseEntity<CommentResponseDto> commentUpdate (@PathVariable("comment_id") Long commentId,
-                                                             @RequestBody CommentRequestDto requestDto) {
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentUpdate (@PathVariable("comment_id") Long commentId,
+                                                                      @RequestBody CommentRequestDto requestDto) {
 
         CommentDataDto response = commentService.commentUpdate(commentId, requestDto.getComment());
 
-        CommentResponseDto responseDto = new CommentResponseDto(
-                true,
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 수정이 완료되었습니다.",
-                response,
-                LocalDateTime.now());
+                response);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     // 댓글 삭제 컨트롤러
     @DeleteMapping("/{comment_id}")
-    public ResponseEntity<CommentDeleteResponseDto> commentDelete (@PathVariable("comment_id") Long commentId) {
+    public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete (@PathVariable("comment_id") Long commentId) {
 
         CommentDeleteDto response = commentService.commentdelete(commentId);
 
-        CommentDeleteResponseDto responseDto = new CommentDeleteResponseDto(
-                true,
+        ResponseDto<CommentDeleteDto> responseDto = new ResponseDto<>(
                 "댓글 삭제가 완료되었습니다.",
-                response,
-                LocalDateTime.now());
+                response);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }

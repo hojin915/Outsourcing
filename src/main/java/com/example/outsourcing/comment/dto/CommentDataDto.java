@@ -45,7 +45,7 @@ public class CommentDataDto {
                 comment.getUser().getUsername(),
                 comment.getComment(),
                 comment.getCreatedAt(),
-                comment.getModifiedAt()
+                comment.getUpdatedAt()
         );
     }
 }
