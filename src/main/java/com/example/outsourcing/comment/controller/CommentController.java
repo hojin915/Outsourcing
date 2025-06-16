@@ -34,7 +34,8 @@ public class CommentController {
         // response객체 생성
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 생성이 완료되었습니다.",
-                response);
+                response
+        );
 
         // 반환
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -50,7 +51,8 @@ public class CommentController {
         // response객체 생성
         ResponseDto<List<CommentDataDto>> responseDto = new ResponseDto<>(
                 "댓글 조회가 완료되었습니다.",
-                commentFindAll);
+                commentFindAll
+        );
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -63,7 +65,8 @@ public class CommentController {
 
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 단건 조회가 완료되었습니다.",
-                commentFindById);
+                commentFindById
+        );
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -77,7 +80,8 @@ public class CommentController {
 
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 수정이 완료되었습니다.",
-                response);
+                response
+        );
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -90,7 +94,8 @@ public class CommentController {
 
         ResponseDto<CommentDeleteDto> responseDto = new ResponseDto<>(
                 "댓글 삭제가 완료되었습니다.",
-                response);
+                response
+        );
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
