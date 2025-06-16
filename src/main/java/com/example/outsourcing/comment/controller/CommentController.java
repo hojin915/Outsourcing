@@ -1,6 +1,7 @@
 package com.example.outsourcing.comment.controller;
 
 import com.example.outsourcing.comment.dto.CommentDataDto;
+import com.example.outsourcing.comment.dto.CommentFindAllResponseDto;
 import com.example.outsourcing.comment.dto.CommentRequestDto;
 import com.example.outsourcing.comment.dto.CommentResponseDto;
 import com.example.outsourcing.comment.service.CommentService;
@@ -26,14 +27,15 @@ public class CommentController {
 
     // 댓글 생성 컨트롤러
     @PostMapping("/{task_id}")
-    public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal User user,
+    public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal(expression = "username") String username,
                                                               @PathVariable("task_id") Long taskId,
                                                               @RequestBody CommentRequestDto requestDto) {
 
-        Long userId = user.getId();
+
+//          Long userId = 1L;
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
-        CommentDataDto response = commentService.commentCreated(userId, taskId, requestDto.getComment());
+        CommentDataDto response = commentService.commentCreated(username, taskId, requestDto.getComment());
 
         // response객체 생성
         CommentResponseDto responseDto = new CommentResponseDto(
@@ -48,13 +50,13 @@ public class CommentController {
 
     // 태스크 댓글 전체 조회 컨트롤러
     @GetMapping("/{task_id}")
-    public ResponseEntity<CommentResponseDto> commentFindAll (@PathVariable("task_id") Long taskId) {
+    public ResponseEntity<CommentFindAllResponseDto> commentFindAll (@PathVariable("task_id") Long taskId) {
 
         // 서비스 레이어의 commentFindAll 메서드 호출
         List<CommentDataDto> commentFindAll = commentService.commentFindAll(taskId);
 
         // response객체 생성
-        CommentResponseDto responseDto = new CommentResponseDto(
+        CommentFindAllResponseDto responseDto = new CommentFindAllResponseDto(
                 true,
                 "댓글 조회가 완료되었습니다.",
                 commentFindAll,
@@ -64,7 +66,7 @@ public class CommentController {
     }
 
     // 댓글 단건 조회 컨트롤러
-    @GetMapping("/{comment_id}")
+    @GetMapping("/find/{comment_id}")
     public ResponseEntity<CommentResponseDto> commentFindById (@PathVariable("comment_id") Long commentId) {
 
         commentService.commentFindById(commentId);

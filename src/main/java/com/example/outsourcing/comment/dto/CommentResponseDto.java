@@ -13,9 +13,7 @@ public class CommentResponseDto {
 
     private final String message;
 
-    private CommentDataDto data;
-
-    private List<CommentDataDto> listData;
+    private final CommentDataDto data;
 
     private final LocalDateTime timestamp;
 
@@ -27,11 +25,5 @@ public class CommentResponseDto {
         this.timestamp = timestamp;
     }
 
-    public CommentResponseDto(boolean success, String message, List<CommentDataDto> listData, LocalDateTime timestamp) {
-        this.success = success;
-        this.message = message;
-        this.listData = listData;
-        this.timestamp = timestamp;
-    }
 }
 
