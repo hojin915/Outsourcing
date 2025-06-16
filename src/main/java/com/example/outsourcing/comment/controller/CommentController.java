@@ -4,6 +4,7 @@ import com.example.outsourcing.comment.dto.CommentDataDto;
 import com.example.outsourcing.comment.dto.CommentRequestDto;
 import com.example.outsourcing.comment.dto.CommentResponseDto;
 import com.example.outsourcing.comment.service.CommentService;
+import com.example.outsourcing.user.entity.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,9 +26,11 @@ public class CommentController {
 
     // 댓글 생성 컨트롤러
     @PostMapping("/{task_id}")
-    public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal Long userId,
+    public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal User user,
                                                               @PathVariable("task_id") Long taskId,
                                                               @RequestBody CommentRequestDto requestDto) {
+
+        Long userId = user.getId();
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
         CommentDataDto response = commentService.commentCreated(userId, taskId, requestDto.getComment());
@@ -40,17 +43,24 @@ public class CommentController {
                 LocalDateTime.now());
 
         // 반환
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
-    // 댓글 전체 조회 컨트롤러
+    // 태스크 댓글 전체 조회 컨트롤러
     @GetMapping("/{task_id}")
-    public ResponseEntity<List<CommentResponseDto>> commentFindAll (@PathVariable("task_id") Long taskId) {
+    public ResponseEntity<CommentResponseDto> commentFindAll (@PathVariable("task_id") Long taskId) {
 
         // 서비스 레이어의 commentFindAll 메서드 호출
-        commentService.commentFindAll(taskId);
+        List<CommentDataDto> commentFindAll = commentService.commentFindAll(taskId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        // response객체 생성
+        CommentResponseDto responseDto = new CommentResponseDto(
+                true,
+                "댓글 조회가 완료되었습니다.",
+                commentFindAll,
+                LocalDateTime.now());
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
 }

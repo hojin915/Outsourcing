@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -25,12 +26,12 @@ public class CommentService {
     @Transactional
     public CommentDataDto commentCreated(Long userId, Long taskId, String comment) {
 
+        // 유저 예외처리
+        User user = new User();
+
         // 댓글 생성할 테스크 호출
         // 태스크 예외처리 (댓글 생성하려는 태스크가 존재하지 않을 경우)
         Task task = new Task();
-
-        // 유저 예외처리
-        User user = new User();
 
         // 댓글 생성
         Comment newComment = new Comment(task, user, comment);
@@ -49,7 +50,7 @@ public class CommentService {
         );
     }
 
-    // 댓글 전체 조회 비지니스 로직
+    // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
     public List<CommentDataDto> commentFindAll(Long taskId) {
         // 태스크 예외처리 (댓글 조회하려는 태스크가 존재하지 않을 경우)
@@ -59,4 +60,5 @@ public class CommentService {
                 .map(CommentDataDto::toDto) // Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
                 .toList();
     }
+
 }

@@ -3,6 +3,7 @@ package com.example.outsourcing.comment.dto;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class CommentResponseDto {
@@ -12,7 +13,9 @@ public class CommentResponseDto {
 
     private final String message;
 
-    private final CommentDataDto data;
+    private CommentDataDto data;
+
+    private List<CommentDataDto> listData;
 
     private final LocalDateTime timestamp;
 
@@ -23,5 +26,6 @@ public class CommentResponseDto {
         this.data = data;
         this.timestamp = timestamp;
     }
+
 }
 
