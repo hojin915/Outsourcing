@@ -25,8 +25,8 @@ public class CommentController {
     // 댓글 생성 컨트롤러
     @PostMapping("/{task_id}")
     public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated (@AuthenticationPrincipal AuthUser user,
-                                                                @PathVariable("task_id") Long taskId,
-                                                                @RequestBody CommentRequestDto requestDto) {
+                                                                       @PathVariable("task_id") Long taskId,
+                                                                       @RequestBody CommentRequestDto requestDto) {
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
         CommentDataDto response = commentService.commentCreated(user.getId(), taskId, requestDto.getComment());
