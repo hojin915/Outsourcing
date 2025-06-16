@@ -4,12 +4,14 @@ import com.example.outsourcing.comment.dto.CommentDataDto;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.task.entity.Task;
+import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
+import com.example.outsourcing.user.repository.UserRepository;
+import com.example.outsourcing.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -17,21 +19,30 @@ public class CommentService {
 
     // CommentRepository 의존성 주입(DI)
     private final CommentRepository commentRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public CommentService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository, UserService userService, UserRepository userRepository, TaskRepository taskRepository) {
         this.commentRepository = commentRepository;
+        this.userService = userService;
+        this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     // 댓글 생성 비지니스 로직
     @Transactional
-    public CommentDataDto commentCreated(Long userId, Long taskId, String comment) {
+    public CommentDataDto commentCreated(String username, Long taskId, String comment) {
 
         // 유저 예외처리
-        User user = new User();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException()
+                );
 
-        // 댓글 생성할 테스크 호출
+
+        // 댓글 생성할 태스크 호출
         // 태스크 예외처리 (댓글 생성하려는 태스크가 존재하지 않을 경우)
-        Task task = new Task();
+        Task task = taskRepository.findById(taskId);
 
         // 댓글 생성
         Comment newComment = new Comment(task, user, comment);
@@ -44,6 +55,7 @@ public class CommentService {
                 newComment.getCommentId(),
                 newComment.getTask().getId(),
                 newComment.getUser().getId(),
+                newComment.getUser().getUsername(),
                 newComment.getComment(),
                 newComment.getCreatedAt(),
                 newComment.getModifiedAt()

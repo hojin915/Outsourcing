@@ -12,6 +12,7 @@ public class CommentDataDto {
     private final Long commentId;
     private final Long taskId;
     private final Long userId;
+    private final String username;
     private final String comment;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -21,6 +22,7 @@ public class CommentDataDto {
             Long commentId,
             Long taskId,
             Long userId,
+            String username,
             String comment,
             LocalDateTime createdAt,
             LocalDateTime modifiedAt
@@ -28,6 +30,7 @@ public class CommentDataDto {
         this.commentId = commentId;
         this.taskId = taskId;
         this.userId = userId;
+        this.username = username;
         this.comment = comment;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
@@ -39,6 +42,7 @@ public class CommentDataDto {
                 comment.getCommentId(),
                 comment.getTask().getId(),
                 comment.getUser().getId(),
+                comment.getUser().getUsername(),
                 comment.getComment(),
                 comment.getCreatedAt(),
                 comment.getModifiedAt()

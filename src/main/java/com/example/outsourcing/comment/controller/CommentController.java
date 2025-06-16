@@ -66,7 +66,7 @@ public class CommentController {
     }
 
     // 댓글 단건 조회 컨트롤러
-    @GetMapping("/find/{comment_id}")
+    @GetMapping("/comment/{comment_id}")
     public ResponseEntity<CommentResponseDto> commentFindById (@PathVariable("comment_id") Long commentId) {
 
         commentService.commentFindById(commentId);
