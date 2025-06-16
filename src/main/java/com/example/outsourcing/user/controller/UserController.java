@@ -9,6 +9,7 @@ import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,14 +21,13 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
+    // Todo 공통 Response 완료시 응답 적용하기
     @PostMapping("/register")
     public ResponseEntity<UserSignupResponseDto> signup(
             @Valid @RequestBody UserSignupRequestDto requestDto
     ){
         UserSignupResponseDto responseDto = userService.signup(requestDto);
-        // 1L -> userId로 변경
-        URI location = URI.create("/api/users/" + 1L);
+        URI location = URI.create("/api/users/" + responseDto.getId());
         return ResponseEntity.created(location).body(responseDto);
     }
 
@@ -35,7 +35,6 @@ public class UserController {
     public ResponseEntity<UserLoginResponseDto> login(
             @Valid @RequestBody UserLoginRequestDto requestDto
     ){
-
         return ResponseEntity.ok(userService.login(requestDto));
     }
 
@@ -44,5 +43,13 @@ public class UserController {
             @AuthenticationPrincipal(expression = "username") String username
     ){
         return ResponseEntity.ok(userService.getProfile(username));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> delete(
+            @AuthenticationPrincipal(expression = "username") String username
+    ){
+        userService.delete(username);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
