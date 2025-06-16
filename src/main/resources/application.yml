@@ -5,9 +5,9 @@ spring:
   application:
     name: Outsourcing
   datasource:
-    url: jdbc:mysql://localhost:3306/${DB_SCHEME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/Tasks
+    username: root
+    password: ahepfgustn1
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:

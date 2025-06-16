@@ -1,23 +1,15 @@
 package com.example.outsourcing.user.entity;
 
-import com.example.outsourcing.comment.entity.Comment;
-import com.example.outsourcing.common.entity.SoftDeleteEntity;
 import com.example.outsourcing.common.enums.UserRole;
-import com.example.outsourcing.task.entity.Task;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Where;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
 @NoArgsConstructor
-@Where(clause = "")
 @Table(name = "users")
-public class User extends SoftDeleteEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,13 +20,6 @@ public class User extends SoftDeleteEntity {
     private String name;
     private UserRole userRole;
 
-    @OneToMany(mappedBy = "user")
-    private List<Task> tasks = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user")
-    private List<Comment> comments = new ArrayList<>();
-
-
     public User(String username, String email, String password, String name, UserRole userRole) {
         this.username = username;
         this.email = email;
@@ -42,6 +27,13 @@ public class User extends SoftDeleteEntity {
         this.name = name;
         this.userRole = userRole;
     }
+    public User(String username, UserRole userRole) {
+        this.username = username;
+        this.userRole = userRole;
+    }
 
     // image
+
+    // 생성일/수정일 추가
+    // isDeleted/deletedAt 추가
 }

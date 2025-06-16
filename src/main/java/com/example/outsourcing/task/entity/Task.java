@@ -1,14 +1,10 @@
 package com.example.outsourcing.task.entity;
 
-import com.example.outsourcing.comment.entity.Comment;
-import com.example.outsourcing.common.entity.SoftDeleteEntity;
-import com.example.outsourcing.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -17,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Task extends SoftDeleteEntity {
+public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,16 +35,32 @@ public class Task extends SoftDeleteEntity {
 
     @Column(name = "start_date")
     private LocalDateTime startDate;
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Builder.Default
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @Column(nullable = false)
     private LocalDateTime dueDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
 
-    @OneToMany(mappedBy = "task")
-    private List<Comment> comments = new ArrayList<>();
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public enum Priority {
         LOW, MEDIUM, HIGH
