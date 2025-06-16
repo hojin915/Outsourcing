@@ -1,9 +1,12 @@
 package com.example.outsourcing.user.service;
 
+import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
+import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
+import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
@@ -16,17 +19,22 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public UserSignupResponseDto signup(UserSignupRequestDto request) {
         String username = request.getUsername();
         String email = request.getEmail();
         String password = passwordEncoder.encode(request.getPassword());
         String name = request.getName();
-        User user = new User(username, email, password, name);
+        User user = new User(username, email, password, name, UserRole.USER);
 
         // 이메일 중복시 예외처리, 커스텀 exception 변경
         if(userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email already exists");
+        }
+        // 아이디 중복시 예외처리, 커스텀 exception 변경
+        if(userRepository.existsByUsername(username)){
+            throw new RuntimeException("Username already exists");
         }
 
         User savedUser = userRepository.save(user);
@@ -48,9 +56,14 @@ public class UserService {
         }
 
         // jwt 완성되면 추가
-        // String token = jwtUtil.createToken()
-        String token = "temp";
+        String token = jwtUtil.createToken(user.getId(), user.getUsername(),user.getUserRole());
 
         return new UserLoginResponseDto(token);
+    }
+
+    public UserProfileResponseDto getProfile(String username) {
+        User totalUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserProfileResponseDto(totalUser);
     }
 }

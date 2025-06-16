@@ -3,15 +3,15 @@ package com.example.outsourcing.user.controller;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
+import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
+import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -37,5 +37,12 @@ public class UserController {
     ){
 
         return ResponseEntity.ok(userService.login(requestDto));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponseDto> profile(
+            @AuthenticationPrincipal(expression = "username") String username
+    ){
+        return ResponseEntity.ok(userService.getProfile(username));
     }
 }
