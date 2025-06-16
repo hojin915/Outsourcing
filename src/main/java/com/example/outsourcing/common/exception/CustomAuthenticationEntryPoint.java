@@ -13,7 +13,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -27,11 +26,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         HttpStatus status = HttpStatus.UNAUTHORIZED;
 
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                false,
                 "인증되지 않은 URL 요청입니다. : " + authException.getMessage(),
-                null,
-                status.getReasonPhrase(),
-                LocalDateTime.now().toString()
+                status.getReasonPhrase()
         );
         String responseBody = objectMapper.writeValueAsString(errorResponseDto);
 
