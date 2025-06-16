@@ -27,5 +27,11 @@ public class CommentResponseDto {
         this.timestamp = timestamp;
     }
 
+    public CommentResponseDto(boolean success, String message, List<CommentDataDto> listData, LocalDateTime timestamp) {
+        this.success = success;
+        this.message = message;
+        this.listData = listData;
+        this.timestamp = timestamp;
+    }
 }
 
