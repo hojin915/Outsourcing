@@ -1,6 +1,7 @@
 package com.example.outsourcing.comment.service;
 
 import com.example.outsourcing.comment.dto.CommentDataDto;
+import com.example.outsourcing.comment.dto.CommentDeleteDto;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.task.entity.Task;
@@ -11,6 +12,7 @@ import com.example.outsourcing.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -91,5 +93,17 @@ public class CommentService {
         commentUpdate.setComment(comment);
 
         return CommentDataDto.toDto(commentUpdate);
+    }
+
+    // 댓글 삭제 비지니스 로직
+    @Transactional
+    public CommentDeleteDto commentdelete(Long commentId) {
+
+        Comment comment = commentRepository.findById(commentId).get();
+
+        comment.setDeleted(true);
+        comment.setDeletedAt(LocalDateTime.now());
+
+        return CommentDeleteDto.toDto(comment);
     }
 }

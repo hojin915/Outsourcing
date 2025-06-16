@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Entity
 @Table(name = "comments")
@@ -26,8 +28,11 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
-    // 생성일/수정일 추가
-    // isDeleted/deletedAt 추가
+    @Setter
+    private boolean isDeleted;
+
+    @Setter
+    private LocalDateTime deletedAt;
 
     public Comment() {}
 

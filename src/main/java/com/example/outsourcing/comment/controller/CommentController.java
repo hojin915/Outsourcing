@@ -1,9 +1,6 @@
 package com.example.outsourcing.comment.controller;
 
-import com.example.outsourcing.comment.dto.CommentDataDto;
-import com.example.outsourcing.comment.dto.CommentFindAllResponseDto;
-import com.example.outsourcing.comment.dto.CommentRequestDto;
-import com.example.outsourcing.comment.dto.CommentResponseDto;
+import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.service.CommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +26,6 @@ public class CommentController {
     public ResponseEntity<CommentResponseDto> commentCreated (@AuthenticationPrincipal(expression = "username") String username,
                                                               @PathVariable("task_id") Long taskId,
                                                               @RequestBody CommentRequestDto requestDto) {
-
-
-//          Long userId = 1L;
 
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
         CommentDataDto response = commentService.commentCreated(username, taskId, requestDto.getComment());
@@ -83,6 +77,21 @@ public class CommentController {
         CommentResponseDto responseDto = new CommentResponseDto(
                 true,
                 "댓글 수정이 완료되었습니다.",
+                response,
+                LocalDateTime.now());
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 댓글 삭제 컨트롤러
+    @DeleteMapping("/{comment_id}")
+    public ResponseEntity<CommentDeleteResponseDto> commentDelete (@PathVariable("comment_id") Long commentId) {
+
+        CommentDeleteDto response = commentService.commentdelete(commentId);
+
+        CommentDeleteResponseDto responseDto = new CommentDeleteResponseDto(
+                true,
+                "댓글 삭제가 완료되었습니다.",
                 response,
                 LocalDateTime.now());
 
