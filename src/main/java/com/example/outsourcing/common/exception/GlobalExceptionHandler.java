@@ -30,6 +30,13 @@ public class GlobalExceptionHandler {
         return getErrorResponse(status, ex.getMessage());
     }
 
+    // CustomException 추가, 사용시 enum 코드 또는 enum 코드 + 원하는 메세지
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException ex) {
+        HttpStatus status = ex.getExceptionCode().getHttpStatus();
+        return getErrorResponse(status, ex.getMessage());
+    }
+
     public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, String message) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 message,

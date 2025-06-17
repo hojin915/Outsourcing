@@ -33,13 +33,9 @@ public class ManagerService {
         if(user.isDeleted() || targetUser.isDeleted()) {
             throw new UnauthorizedException("탈퇴한 유저입니다.");
         }
-        // Task 작업 완료되면 사용
-        // Task task = taskRepository.findByTaskId(taskId);
 
-        // 가짜 Task 사용중
-        Task task = new Task();
-        task.setId(taskId);
-        task.setUser(user);
+        Task task = taskRepository.findById(taskId)
+            .orElseThrow(() -> new NotFoundException("등록할 일정을 찾을 수 없습니다."));
 
         // 본인이 본인을 task 의 담당자로 등록하려는 경우 예외처리
         if(requestDto.getTargetId().equals(user.getId())){
