@@ -1,5 +1,8 @@
 package com.example.outsourcing.common.enums;
 
+import com.example.outsourcing.common.exception.exceptions.CustomException;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
+
 import java.util.Arrays;
 
 public enum UserRole {
@@ -9,6 +12,6 @@ public enum UserRole {
         return Arrays.stream(UserRole.values())
                 .filter(r -> r.name().equalsIgnoreCase(role))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 UserRole"));
+                .orElseThrow(() -> new CustomException(ExceptionCode.INVALID_USER_ROLE));
     }
 }
