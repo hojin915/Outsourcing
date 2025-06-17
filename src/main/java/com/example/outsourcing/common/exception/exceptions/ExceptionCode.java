@@ -9,13 +9,18 @@ public enum ExceptionCode {
     INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자 권한입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "요청이 잘못되었습니다"),
 
+    UNSUPPORTED_JWT_TOKENS(HttpStatus.BAD_REQUEST, "지원되지 않는 JWT 토큰 입니다."),
+    INVALID_JWT_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않는 JWT 토큰입니다."),
+
     // 401
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 틀렸습니다"),
     UNAUTHORIZED_API_REQUEST(HttpStatus.UNAUTHORIZED, "인증되지 않은 URL 요청입니다."),
+    INVALID_JWT_SIGNATURE(HttpStatus.UNAUTHORIZED, "유효하지 않는 JWT 서명입니다."),
+    EXPIRED_JWT_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 JWT 토큰입니다."),
 
     // 403
-    NOT_AUTHOR(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    ACCESS_DENIED(HttpStatus.FORBIDDEN, "작성자가 아닙니다"),
+    NOT_AUTHOR(HttpStatus.FORBIDDEN, "작성자가 아닙니다"),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"),
