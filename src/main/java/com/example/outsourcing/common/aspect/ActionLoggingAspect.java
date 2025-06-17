@@ -2,43 +2,43 @@ package com.example.outsourcing.common.aspect;
 
 import com.example.outsourcing.activitylog.entity.ActivityLog;
 import com.example.outsourcing.activitylog.service.ActivityLogService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.outsourcing.common.entity.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class UserActionLoggingAspect {
+public class ActionLoggingAspect {
 
     private final ActivityLogService activityLogService;
 
     // Pointcut: *Service 패키지 내의 모든 메서드에 AOP 적용
-    @Pointcut("execution(* com.example.outsourcing.user.service.*Service.*(..))")
-    public void UserServiceMethods() {
+    @Pointcut("execution(* com.example.outsourcing.*.*.*Service.*(..)) " +
+            "&& !execution(* com.example.outsourcing.activitylog.service.ActivityLogService.*(..))")
+    public void ServiceMethods() {
     }
 
-    @Around("UserServiceMethods()")
+    @Around("ServiceMethods()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         // 시작시간
         long startTime = System.currentTimeMillis();
 
         //작업 시간
         LocalDateTime requestTime = LocalDateTime.now();
-        // 현재 요청의 IP 주소를 가져오는 메서드 : X-Forwarded-For:unknown
+        // 현재 요청의 IP 주소를 가져오는 메서드 : ex) X-Forwarded-For:unknown
         String clientIpAddress = getClientIpAddress();
         // HTTP 메서드 (GET, POST 등)
         String requestMethod = getRequestMethod();
@@ -48,35 +48,57 @@ public class UserActionLoggingAspect {
         String loggedInUserId = getCurrentLoggedInUserId();
 
 //        Long targetId = getTargetIdFromToken();
-        String activityType = null;
-        Object result = null;
 
+        Signature signature = joinPoint.getSignature();
+        String methodName = signature.getName();
+
+        String activityType = null;
+        if (methodName.equals("signup")) {
+            activityType = "USER_SIGNUP";
+        } else if (methodName.equals("login")) {
+            activityType = "USER_LOGIN";
+        } else if (methodName.equals("profile")) {
+            activityType = "USER_PROFILE";
+        } else if (methodName.equals("delete")) {
+            activityType = "USER_DELETE";
+        } else if (methodName.equals("delete")) {
+            activityType = "USER_DELETE";
+        } else if (methodName.equals("commentCreated")) {
+            activityType = "COMMENT_CREATED";
+        } else if (methodName.equals("commentFindAll")) {
+            activityType = "COMMENT_FIND_ALL";
+        } else if (methodName.equals("commentFindById")) {
+            activityType = "COMMENT_FIND_BY_ID";
+        } else if (methodName.equals("commentUpdate")) {
+            activityType = "COMMENT_UPDATED";
+        } else if (methodName.equals("commentdelete")) {
+            activityType = "COMMENT_DELETED";
+        }
+
+        Object result = null;
 
         try {
             result = joinPoint.proceed();
-            Signature signature = joinPoint.getSignature();
-            String methodName = signature.getName();
-
-            // 메서드에 따라 활동 유형 설정
-            if (methodName.equals("signup")) {
-                activityType = "USER_SIGNUP";
-            } else if (methodName.equals("login")) {
-                activityType = "USER_LOGIN";
-            } else if (methodName.equals("profile")) {
-                activityType = "USER_PROFILE";
-            }
-
         } finally {
             long endTime = System.currentTimeMillis();
             Long executionTimeMs = endTime - startTime;
 
+            Long userIdToLog = null;
+            if (methodName.equals("signup") || methodName.equals("login")) {
+                userIdToLog = -1L;
+            } else if (loggedInUserId != null && !loggedInUserId.equals("anonymous")) {
+                try {
+                    userIdToLog = Long.valueOf(loggedInUserId);
+                } catch (NumberFormatException e) {
+                    log.error("Error converting loggedInUserId to Long: " + loggedInUserId, e);
+                }
+            }
+
             // null 체크 및 로그 기록
-            if (loggedInUserId != null && !loggedInUserId.equals("anonymous") &&
-                    activityType != null // && targetId != null
-            ) {
+            if (userIdToLog != null && activityType != null) {
                 ActivityLog activityLog = ActivityLog.builder()
                         .requestTime(requestTime)
-                        .userId(Long.valueOf(loggedInUserId))
+                        .userId(userIdToLog)
                         .ipAddress(clientIpAddress)
                         .requestMethod(requestMethod)
                         .requestUrl(requestUrl)
@@ -84,7 +106,9 @@ public class UserActionLoggingAspect {
 //                        .targetId(targetId)
                         .executionTimeMs(executionTimeMs)
                         .build();
+
                 activityLogService.saveActivityLog(activityLog);
+
             } else {
                 String missingInfo = "경고: 활동 로그 저장 실패 - 필수 정보 누락. " +
                         "LoggedInUserId: " + loggedInUserId +
@@ -98,85 +122,15 @@ public class UserActionLoggingAspect {
         return result;
     }
 
-    private Long getTargetIdFromToken() {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-
-        // Authorization 헤더에서 토큰 추출
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return null;
-        }
-
-        token = token.substring(7);
-
-        // Base64 디코딩으로 페이로드 추출
-        String[] tokenParts = token.split("\\.");
-        if (tokenParts.length != 3) {
-            throw new IllegalStateException("잘못된 JWT 형식입니다");
-        }
-
-        try {
-            // JWT 디코딩
-            String payload = new String(Base64.getDecoder().decode(tokenParts[1]));
-
-            // JSON에서 targetId 추출
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(payload);
-
-            System.out.println("Decoded JWT Payload: " + jsonNode.toString());
-            if (jsonNode.has("targetId")) {
-                return jsonNode.get("targetId").asLong();
-            } else {
-                log.warn("targetId가 JWT에 존재하지 않습니다.");
-                return null;
-            }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     private String getCurrentLoggedInUserId() {
-
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-
-        // 토큰 추출
-        // Authorization 헤더가 없거나 Bearer로 시작하지 않으면 null 반환
-        String token = request.getHeader("Authorization");
-        if (token == null || !token.startsWith("Bearer ")) {
-            return null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof AuthUser) {
+            AuthUser authUser = (AuthUser) authentication.getPrincipal();
+            return String.valueOf(authUser.getId());
         }
-
-        token = token.substring(7);
-
-        // Base64 디코딩으로 페이로드 추출
-        String[] tokenParts = token.split("\\.");
-        if (tokenParts.length != 3) {
-            throw new IllegalStateException("잘못된 JWT 형식입니다");
-        }
-
-        try {
-            // JWT 디코딩
-            String payload = new String(Base64.getDecoder().decode(tokenParts[1]));
-
-            // JSON에서 사용자명 추출
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readTree(payload);
-
-            // jsonNode 내용을 출력하여 확인
-            System.out.println("Decoded JWT Payload: " + jsonNode.toString());
-
-            // id가 존재하는지 확인 후 반환
-            if (jsonNode.has("id")) {
-                return jsonNode.get("id").asText();
-            } else {
-                log.warn("id가 JWT에 존재하지 않습니다.");
-                return null;
-            }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return null;
     }
+
 
     private String getClientIpAddress() {
         ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -184,7 +138,7 @@ public class UserActionLoggingAspect {
             HttpServletRequest request = sra.getRequest();
             if (request != null) { // 추가: request가 null인지 확인
                 // X-Forwarded-For 헤더
-                String xForwardedFor = request.getHeader("X-Forwarded-For");
+                String xForwardedFor = request.getHeader("x-forwarded-for");
                 if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
                     // 여러 IP가 있는 경우 첫 번째 IP 반환
                     String ip = xForwardedFor.split(",")[0].trim();

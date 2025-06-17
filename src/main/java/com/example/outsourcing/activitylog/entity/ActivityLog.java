@@ -47,6 +47,5 @@ public class ActivityLog {
 
     @Column(nullable = false)
     private Long executionTimeMs;
-//sdf;kalsdfjlka;sdf
 
 }
