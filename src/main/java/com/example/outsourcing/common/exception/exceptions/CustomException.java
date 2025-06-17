@@ -1,6 +1,5 @@
-package com.example.outsourcing.common.exception;
+package com.example.outsourcing.common.exception.exceptions;
 
-import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import lombok.Getter;
 
 @Getter
