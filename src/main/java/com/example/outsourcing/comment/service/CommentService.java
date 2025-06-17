@@ -73,9 +73,12 @@ public class CommentService {
     // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
     public List<CommentDataDto> commentFindAll(Long taskId) {
-        // 태스크 예외처리 (댓글 조회하려는 태스크가 존재하지 않을 경우)
 
-        return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(taskId)
+        // 태스크가 존재하지 않을 때 예외처리
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
+
+        return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId())
                 .stream()
                 .map(CommentDataDto::toDto) // Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
                 .toList();
@@ -86,6 +89,11 @@ public class CommentService {
     public CommentDataDto commentFindById(Long commentId) {
 
         Comment findByIdComment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
+
+        // 조회한 댓글이 존재하지 않을 경우 예외처리
+        if (findByIdComment == null) {
+            throw new CustomException(COMMENT_NOT_FOUND);
+        }
 
         return CommentDataDto.toDto(findByIdComment);
     }
