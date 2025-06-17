@@ -7,7 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,9 +50,6 @@ public class JwtFilter extends OncePerRequestFilter {
             setAuthentication(jwt);
 
             chain.doFilter(request, response);
-        } catch (AuthException e) {
-            log.error("Not Found Token, JWT 토큰을 찾지 못했습니다.", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰을 찾지 못했습니다.");
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
