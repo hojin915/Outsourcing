@@ -1,6 +1,7 @@
 package com.example.outsourcing.user.controller;
 
 import com.example.outsourcing.common.dto.ResponseDto;
+import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
@@ -56,9 +57,10 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<ResponseDto<Void>> delete(
-            @AuthenticationPrincipal(expression = "username") String username
+            @AuthenticationPrincipal(expression = "username") String username,
+            @RequestBody UserDeleteRequestDto request
     ){
-        userService.delete(username);
+        userService.delete(username, request);
         ResponseDto<Void> response = new ResponseDto<>("회원탈퇴가 완료되었습니다", null);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
