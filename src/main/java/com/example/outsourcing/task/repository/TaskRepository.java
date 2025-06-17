@@ -17,18 +17,18 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
    @Query("""
-        SELECT t FROM Task t
-        WHERE (: status IS NULL OR t.status = :status)
-           AND (
-              :keyword IS NULL 
-               OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-               OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           )
-   """)
-
-    Page<Task> findByCondition(@Param("status") Task.Status status,
-                               @Param("keyword") String keyword,
-                               Pageable pageable);
+    SELECT t FROM Task t
+    WHERE (:status IS NULL OR t.status = :status)
+      AND (
+        (:keyword IS NULL OR TRIM(:keyword) = '')
+        OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+    ORDER BY t.createdAt DESC
+""")
+   Page<Task> findByCondition(@Param("status") Task.Status status,
+                              @Param("keyword") String keyword,
+                              Pageable pageable);
 
     // 상태로 필터링
     List<Task> findByStatus(Task.Status status);
