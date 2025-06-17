@@ -33,6 +33,7 @@ public class Task extends SoftDeleteEntity {
     @Column(nullable = false)
     private Status status = Status.TODO;
 
+    // 변경
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
@@ -55,6 +56,11 @@ public class Task extends SoftDeleteEntity {
     }
 
     public enum Status {
-        TODO, IN_PROGRESS, DONE
+        TODO, IN_PROGRESS, DONE;
+
+        public boolean canTransitionTo(Status next) {
+            return (this == Status.TODO && next == Status.IN_PROGRESS) ||
+                    (this == Status.IN_PROGRESS && next == Status.DONE);
+        }
     }
 }

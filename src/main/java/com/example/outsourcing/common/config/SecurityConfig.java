@@ -34,9 +34,9 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-//                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-//                        .anyRequest().authenticated()
+//                        .anyRequest().permitAll()
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                        .anyRequest().authenticated()
                 )
 
                 //JWT 검증 필터 등록
