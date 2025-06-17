@@ -1,12 +1,12 @@
 package com.example.outsourcing.common.filter;
 
 import com.example.outsourcing.common.config.JwtUtil;
+import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.enums.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
-import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +17,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -51,9 +50,6 @@ public class JwtFilter extends OncePerRequestFilter {
             setAuthentication(jwt);
 
             chain.doFilter(request, response);
-        } catch (AuthException e) {
-            log.error("Not Found Token, JWT 토큰을 찾지 못했습니다.", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰을 찾지 못했습니다.");
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
@@ -80,13 +76,14 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void setAuthentication(String jwt) {
+        Long id = jwtUtil.getUserIdFromToken(jwt);
         String username = jwtUtil.getUsernameFromToken(jwt);
         UserRole userRole = jwtUtil.getUserRoleFromToken(jwt);
-        User user = new User(username, "", List.of(new SimpleGrantedAuthority("ROLE_" + userRole.name())));
+        AuthUser authUser = new AuthUser(id, username, "", List.of(new SimpleGrantedAuthority("ROLE_" + userRole.name())));
 
         // SecurityContext에 인증 토큰 저장
         SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities()));
+                .setAuthentication(new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities()));
     }
 
 }
