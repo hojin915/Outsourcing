@@ -69,12 +69,12 @@ public class ManagerService {
 
         // 본인이 본인을 task 의 담당자로 등록하려는 경우 예외처리
         if(targetUser.getId().equals(user.getId())){
-            throw new IllegalArgumentException("본인은 담당자로 등록할 수 없습니다");
+            throw new CustomException(ExceptionCode.BAD_REQUEST, "본인을 등록할 수 없습니다");
         }
 
         // 다른사람이 생성한 Task 담당자 등록시 예외처리
         if(!user.getId().equals(task.getUser().getId())){
-            throw new UnauthorizedException("본인이 생성한 업무가 아닙니다");
+            throw new CustomException(ExceptionCode.NOT_AUTHOR);
         }
     }
 }
