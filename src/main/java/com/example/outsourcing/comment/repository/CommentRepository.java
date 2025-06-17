@@ -2,6 +2,8 @@ package com.example.outsourcing.comment.repository;
 
 import com.example.outsourcing.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -11,4 +13,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(Long taskId);
 
     Comment findByCommentIdAndIsDeletedFalse(Long commentId);
+
+    @Query("SELECT c FROM Comment c WHERE c.task.id = :taskId AND c.isDeleted = false AND LOWER(c.comment) LIKE LOWER(CONCAT('%',:search,'%')) ORDER BY c.createdAt DESC ")
+    List<Comment> findByTaskIdAndSearch  (Long taskId,String search);
+
 }

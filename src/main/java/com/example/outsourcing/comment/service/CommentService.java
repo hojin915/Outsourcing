@@ -106,4 +106,14 @@ public class CommentService {
 
         return CommentDeleteDto.toDto(comment);
     }
+
+    // 태스크별 댓글 검색 비지니스 로직
+    @Transactional
+    public List<CommentDataDto> commentSearch(Long taskId, String search) {
+
+        return commentRepository.findByTaskIdAndSearch(taskId, search)
+                .stream()
+                .map(CommentDataDto::toDto)
+                .toList();
+    }
 }

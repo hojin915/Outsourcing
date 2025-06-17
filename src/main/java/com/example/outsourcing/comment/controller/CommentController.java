@@ -99,4 +99,19 @@ public class CommentController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    // 태스크 댓글 검색 기능
+    @GetMapping("/{task_id}/search")
+    public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentSearch (@PathVariable("task_id") Long taskId,
+                                                                            @RequestBody CommentSearchRequestDto requestDto) {
+
+        List<CommentDataDto> commentSearch = commentService.commentSearch(taskId, requestDto.getSearch());
+
+        ResponseDto<List<CommentDataDto>> responseDto = new ResponseDto<>(
+                "댓글 검색이 완료되었습니다.",
+                commentSearch
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
 }
