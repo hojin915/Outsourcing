@@ -1,12 +1,12 @@
 package com.example.outsourcing.common.config;
 
 import com.example.outsourcing.common.enums.UserRole;
+import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,11 +48,11 @@ public class JwtUtil {
     }
 
     // JWT 반환
-    public String substringToken(String tokenValue) throws AuthException {
+    public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
             return tokenValue.substring(7);
         }
-        throw new AuthException();
+        throw new UnauthorizedException("Not Found Token");
     }
 
     // JWT 에서 페이로드 반환
