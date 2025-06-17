@@ -4,6 +4,7 @@ import com.example.outsourcing.comment.dto.CommentDataDto;
 import com.example.outsourcing.comment.dto.CommentDeleteDto;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
+import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.example.outsourcing.common.exception.exceptions.ExceptionCode.*;
 
 
 @Service
@@ -38,13 +41,16 @@ public class CommentService {
 
         // 유저 예외처리
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException()
-                );
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
+        // 태스크 예외처리
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
-        // 댓글 생성할 태스크 호출
-        // 현재 태스크 ID로 조회하는 기능이 없습니다.
-        Task task = taskRepository.findById(taskId).get();
+        // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
+        if(comment == null || comment.trim().isEmpty()) {
+            throw new CustomException(COMMENT_BAD_REQUEST);
+        }
 
         // 댓글 생성
         Comment newComment = new Comment(task, user, comment);
