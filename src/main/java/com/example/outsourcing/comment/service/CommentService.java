@@ -27,7 +27,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
 
-    public CommentService(CommentRepository commentRepository, UserService userService, UserRepository userRepository, TaskRepository taskRepository) {
+    public CommentService(CommentRepository commentRepository, UserRepository userRepository, TaskRepository taskRepository) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;

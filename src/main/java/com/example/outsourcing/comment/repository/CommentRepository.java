@@ -14,10 +14,21 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Comment findByCommentIdAndIsDeletedFalse(Long commentId);
 
-    @Query("SELECT c FROM Comment c WHERE c.task.id = :taskId AND c.isDeleted = false AND LOWER(c.comment) LIKE LOWER(CONCAT('%',:search,'%')) ORDER BY c.createdAt DESC ")
+    @Query("SELECT c " +
+            "FROM Comment c " +
+            "WHERE c.task.id = :taskId " +
+            "AND c.isDeleted = false " +
+            "AND LOWER(c.comment) " +
+            "LIKE LOWER(CONCAT('%',:search,'%')) " +
+            "ORDER BY c.createdAt DESC ")
     List<Comment> findByTaskIdAndSearch  (Long taskId,String search);
 
-    @Query("SELECT c FROM Comment c WHERE c.isDeleted = false AND LOWER(c.comment) LIKE LOWER(CONCAT('%',:search,'%')) ORDER BY c.createdAt DESC ")
+    @Query("SELECT c" +
+            " FROM Comment c " +
+            "WHERE c.isDeleted = false " +
+            "AND LOWER(c.comment) " +
+            "LIKE LOWER(CONCAT('%',:search,'%')) " +
+            "ORDER BY c.createdAt DESC ")
     List<Comment> findAllSearch  (String search);
 
 }
