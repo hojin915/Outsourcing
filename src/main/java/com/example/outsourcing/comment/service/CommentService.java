@@ -151,6 +151,14 @@ public class CommentService {
     // 태스크별 댓글 검색 비지니스 로직
     @Transactional
     public List<CommentDataDto> commentFindTaskSearch(Long taskId, String search) {
+        // 태스크가 존재하지 않을 때 예외처리
+        taskRepository.findById(taskId)
+                .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
+
+        // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
+        if(search == null || search.trim().isEmpty()) {
+            throw new CustomException(COMMENT_BAD_REQUEST);
+        }
 
         return commentRepository.findByTaskIdAndSearch(taskId, search)
                 .stream()
@@ -161,6 +169,11 @@ public class CommentService {
     // 전체 댓글 검색 비지니스 로직
     @Transactional
     public List<CommentDataDto> commentfindAllSearch(String search) {
+
+        // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
+        if(search == null || search.trim().isEmpty()) {
+            throw new CustomException(COMMENT_BAD_REQUEST);
+        }
 
         return commentRepository.findAllSearch(search)
                 .stream()
