@@ -6,7 +6,13 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +42,48 @@ public class TaskServiceImpl {
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .build();
+    }
+
+    public List<TaskResponseDto> getAllTasks() {
+        List<Task> tasks = taskRepository.findAll();
+
+        return tasks.stream()
+                .map(task -> TaskResponseDto.builder()
+                        .id(task.getId())
+                        .title(task.getTitle())
+                        .content(task.getContent())
+                        .priority(task.getPriority())
+                        .status(task.getStatus())
+                        .dueDate(task.getDueDate())
+                        .startDate(task.getStartDate())
+                        .createdAt(task.getCreatedAt())
+                        .updatedAt(task.getUpdatedAt())
+                        .build()
+                )
+                .toList();
+    }
+
+    public Page<TaskResponseDto> getTasks(String status, String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Task.Status taskStatus = null;
+        if (status != null) {
+            taskStatus = Task.Status.valueOf(status.toUpperCase());
+        }
+
+        Page<Task> taskPage = taskRepository.findByCondition(taskStatus, keyword, pageable);
+
+        return taskPage.map(task -> TaskResponseDto.builder()
+                .id(task.getId())
+                .title(task.getTitle())
+                .content(task.getContent())
+                .priority(task.getPriority())
+                .status(task.getStatus())
+                .dueDate(task.getDueDate())
+                .startDate(task.getStartDate())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .build()
+        );
     }
 }

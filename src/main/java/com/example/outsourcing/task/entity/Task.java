@@ -29,6 +29,7 @@ public class Task {
     @Column(nullable = false)
     private Status status = Status.TODO;
 
+    // 변경
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
