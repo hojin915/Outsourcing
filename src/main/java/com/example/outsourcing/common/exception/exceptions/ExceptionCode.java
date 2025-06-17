@@ -1,19 +1,21 @@
 package com.example.outsourcing.common.exception.exceptions;
 
 import lombok.Getter;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ExceptionCode {
     // 400
+    INVALID_USER_ROLE(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자 권한입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "요청이 잘못되었습니다"),
 
     // 401
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 틀렸습니다"),
+    UNAUTHORIZED_API_REQUEST(HttpStatus.UNAUTHORIZED, "인증되지 않은 URL 요청입니다."),
 
     // 403
-    NOT_AUTHOR(HttpStatus.FORBIDDEN, "작성자가 아닙니다"),
+    NOT_AUTHOR(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "작성자가 아닙니다"),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"),

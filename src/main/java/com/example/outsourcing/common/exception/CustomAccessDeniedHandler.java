@@ -1,13 +1,13 @@
 package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -23,17 +23,14 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        HttpStatus status = HttpStatus.FORBIDDEN;
+        ExceptionCode status = ExceptionCode.ACCESS_DENIED;
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                "AccessDenied Uri : " + accessDeniedException.getMessage(),
-                status.getReasonPhrase()
-        );
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(status.getMessage(), status);
         String responseBody = objectMapper.writeValueAsString(errorResponseDto);
 
         log.error("FORBIDDEN: AccessDenied - Uri : {}", request.getRequestURI());
 
-        response.setStatus(status.value());
+        response.setStatus(status.getHttpStatus().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(responseBody);
