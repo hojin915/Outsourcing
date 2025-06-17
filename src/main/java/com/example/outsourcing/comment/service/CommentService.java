@@ -24,13 +24,11 @@ public class CommentService {
 
     // CommentRepository 의존성 주입(DI)
     private final CommentRepository commentRepository;
-    private final UserService userService;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
 
     public CommentService(CommentRepository commentRepository, UserService userService, UserRepository userRepository, TaskRepository taskRepository) {
         this.commentRepository = commentRepository;
-        this.userService = userService;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
     }
@@ -100,7 +98,7 @@ public class CommentService {
 
     // 댓글 수정 비지니스 로직
     @Transactional
-    public CommentDataDto commentUpdate(Long commentId, String comment) {
+    public CommentDataDto commentUpdate(Long userId, Long commentId, String comment) {
 
         Comment commentUpdate = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
@@ -118,6 +116,11 @@ public class CommentService {
             throw new CustomException(COMMENT_UPDATED_BAD_REQUEST);
         }
 
+        // 내가 작성한 댓글이 아닐 경우 예외처리
+        if (!userId.equals(commentUpdate.getUser().getId())) {
+            throw new CustomException(COMMENT_AUTHOR_MISMATCH);
+        }
+
         commentUpdate.setComment(comment);
 
         return CommentDataDto.toDto(commentUpdate);
@@ -125,9 +128,19 @@ public class CommentService {
 
     // 댓글 삭제 비지니스 로직
     @Transactional
-    public CommentDeleteDto commentdelete(Long commentId) {
+    public CommentDeleteDto commentdelete(Long userId, Long commentId) {
 
         Comment comment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
+
+        // 댓글이 존재하지 않을 경우 예외처리
+        if (comment == null) {
+            throw new CustomException(COMMENT_NOT_FOUND);
+        }
+
+        // 내가 작성한 댓글이 아닐 경우 예외처리
+        if (!userId.equals(comment.getUser().getId())) {
+            throw new CustomException(COMMENT_AUTHOR_MISMATCH);
+        }
 
         comment.setDeleted(true);
         comment.setDeletedAt(LocalDateTime.now());

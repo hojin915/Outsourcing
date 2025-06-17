@@ -76,10 +76,11 @@ public class CommentController {
 
     // 댓글 수정 컨트롤러
     @PatchMapping("/{comment_id}")
-    public ResponseEntity<ResponseDto<CommentDataDto>> commentUpdate (@PathVariable("comment_id") Long commentId,
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentUpdate (@AuthenticationPrincipal AuthUser user,
+                                                                      @PathVariable("comment_id") Long commentId,
                                                                       @RequestBody CommentRequestDto requestDto) {
 
-        CommentDataDto response = commentService.commentUpdate(commentId, requestDto.getComment());
+        CommentDataDto response = commentService.commentUpdate(user.getId(), commentId, requestDto.getComment());
 
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 수정이 완료되었습니다.",
@@ -91,9 +92,10 @@ public class CommentController {
 
     // 댓글 삭제 컨트롤러
     @DeleteMapping("/{comment_id}")
-    public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete (@PathVariable("comment_id") Long commentId) {
+    public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete (@AuthenticationPrincipal AuthUser user,
+                                                                        @PathVariable("comment_id") Long commentId) {
 
-        CommentDeleteDto response = commentService.commentdelete(commentId);
+        CommentDeleteDto response = commentService.commentdelete(user.getId(), commentId);
 
         ResponseDto<CommentDeleteDto> responseDto = new ResponseDto<>(
                 "댓글 삭제가 완료되었습니다.",
@@ -106,7 +108,7 @@ public class CommentController {
     // 태스크 댓글 검색 기능
     @GetMapping("/{task_id}/search")
     public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentFindTaskSearch (@PathVariable("task_id") Long taskId,
-                                                                            @RequestBody CommentSearchRequestDto requestDto) {
+                                                                                    @RequestBody CommentSearchRequestDto requestDto) {
 
         List<CommentDataDto> commentSearch = commentService.commentFindTaskSearch(taskId, requestDto.getSearch());
 
