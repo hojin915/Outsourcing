@@ -1,8 +1,11 @@
 package com.example.outsourcing.common.filter;
 
 import com.example.outsourcing.common.config.JwtUtil;
+import com.example.outsourcing.common.dto.ErrorResponseDto;
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.enums.UserRole;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -51,17 +54,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
             chain.doFilter(request, response);
         } catch (SecurityException | MalformedJwtException e) {
-            log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
+            sendResponse(response, ExceptionCode.INVALID_JWT_SIGNATURE, e);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+            sendResponse(response, ExceptionCode.EXPIRED_JWT_TOKEN, e);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
+            sendResponse(response, ExceptionCode.UNSUPPORTED_JWT_TOKENS, e);
         } catch (Exception e) {
-            log.error("Invalid JWT token, 유효하지 않는 JWT 토큰 입니다.", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않는 JWT 토큰입니다.");
+            sendResponse(response, ExceptionCode.INVALID_JWT_TOKEN, e);
         }
     }
 
@@ -84,6 +83,18 @@ public class JwtFilter extends OncePerRequestFilter {
         // SecurityContext에 인증 토큰 저장
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities()));
+    }
+
+    private void sendResponse(HttpServletResponse response, ExceptionCode code, Exception e) throws IOException {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(code.getMessage(), code);
+        String responseBody = new ObjectMapper().writeValueAsString(errorResponseDto);
+
+        log.error("{}", code.getHttpStatus(), e);
+
+        response.setStatus(code.getHttpStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(responseBody);
     }
 
 }

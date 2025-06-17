@@ -2,10 +2,9 @@ package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.common.exception.exceptions.NotFoundException;
 import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,8 +15,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,13 +44,12 @@ public class GlobalExceptionHandler {
     // CustomException 추가, 사용시 enum 코드 또는 enum 코드 + 원하는 메세지
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException ex) {
-        HttpStatus status = ex.getExceptionCode().getHttpStatus();
-        return getErrorResponse(status, ex.getMessage());
+        return getCustomErrorResponse(ex.getExceptionCode());
     }
 
     // @Valid로 DTO를 검증할 때 발생하는 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) throws JsonProcessingException {
+    protected ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         // 검증 실패한 메시지를 모두 모아서 리스트로 반환
@@ -64,17 +60,6 @@ public class GlobalExceptionHandler {
                         FieldError::getField,
                         fieldError -> Optional.ofNullable(fieldError.getDefaultMessage()).orElse(""),
                         (existing, replacement) -> replacement));
-
-//        List<Map<String, String>> errors = ex.getBindingResult()
-//                .getFieldErrors()
-//                .stream()
-//                .map(error -> {
-//                    Map<String, String> errorDetail = new HashMap<>();
-//                    errorDetail.put(error.getField(), error.getDefaultMessage());
-//                    return errorDetail;
-//                })
-//                .toList();
-//        String errorMessage = new ObjectMapper().writeValueAsString(errors);
 
         return getErrorResponse(status, errorMap);
     }
@@ -103,6 +88,11 @@ public class GlobalExceptionHandler {
                 status.getReasonPhrase()
         );
         return new ResponseEntity<>(errorResponseDto, status);
+    }
+
+    private ResponseEntity<ErrorResponseDto> getCustomErrorResponse(ExceptionCode code) {
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(code.getMessage(), code);
+        return new ResponseEntity<>(errorResponseDto, code.getHttpStatus());
     }
 
 }
