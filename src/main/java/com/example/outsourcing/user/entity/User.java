@@ -15,7 +15,6 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor
-@Where(clause = "")
 @Table(name = "users")
 public class User extends SoftDeleteEntity {
     @Id
