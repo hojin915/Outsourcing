@@ -36,7 +36,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    Page<Task> findByCondition(@Param("status") Task.Status status,
                               @Param("keyword") String keyword,
                               Pageable pageable);
-public interface TaskRepository extends JpaRepository<Task, Long> {
+
     Optional<Task> findById(Long id);
 
     default Task findByIdOrElseThrow(Long taskId) {

@@ -1,5 +1,7 @@
 package com.example.outsourcing.task.controller;
 
+import com.example.outsourcing.common.entity.AuthUser;
+import com.example.outsourcing.task.dto.ChangeStatusRequestDto;
 import com.example.outsourcing.task.dto.CreateTaskRequestDto;
 import com.example.outsourcing.task.dto.TaskResponseDto;
 import com.example.outsourcing.task.service.TaskServiceImpl;
@@ -7,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +23,11 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskResponseDto> createTask(
-            @RequestBody @Valid CreateTaskRequestDto requestDto
-            ){
-        TaskResponseDto responseDto = taskService.createTask(requestDto);
+            @RequestBody @Valid CreateTaskRequestDto requestDto,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+
+        TaskResponseDto responseDto = taskService.createTask(requestDto, authUser);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -41,5 +46,15 @@ public class TaskController {
     ){
         Page<TaskResponseDto> tasks = taskService.getTasks(status,keyword, page, size);
         return ResponseEntity.ok(tasks);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<String> updateTaskStatus(
+            @PathVariable Long id,
+            @RequestBody ChangeStatusRequestDto dto,
+            @AuthenticationPrincipal AuthUser authUser
+            ) {
+        taskService.updateTaskStatus(id, dto.getStatus(), authUser.getId());
+        return ResponseEntity.ok("success");
     }
 }
