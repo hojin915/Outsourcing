@@ -7,8 +7,11 @@ import com.example.outsourcing.common.exception.exceptions.UnauthorizedException
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -52,18 +57,26 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         // 검증 실패한 메시지를 모두 모아서 리스트로 반환
-        List<Map<String, String>> errors = ex.getBindingResult()
+        Map<String, String> errorMap = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> {
-                    Map<String, String> errorDetail = new HashMap<>();
-                    errorDetail.put(error.getField(), error.getDefaultMessage());
-                    return errorDetail;
-                })
-                .toList();
-        String errorMessage = new ObjectMapper().writeValueAsString(errors);
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        fieldError -> Optional.ofNullable(fieldError.getDefaultMessage()).orElse(""),
+                        (existing, replacement) -> replacement));
 
-        return getErrorResponse(status, errorMessage);
+//        List<Map<String, String>> errors = ex.getBindingResult()
+//                .getFieldErrors()
+//                .stream()
+//                .map(error -> {
+//                    Map<String, String> errorDetail = new HashMap<>();
+//                    errorDetail.put(error.getField(), error.getDefaultMessage());
+//                    return errorDetail;
+//                })
+//                .toList();
+//        String errorMessage = new ObjectMapper().writeValueAsString(errors);
+
+        return getErrorResponse(status, errorMap);
     }
 
     // 예상하지 못한 모든 일반 예외 처리
@@ -74,7 +87,17 @@ public class GlobalExceptionHandler {
         return getErrorResponse(status, ex.getMessage());
     }
 
-    public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, String message) {
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        if(ex.getCause() instanceof ConstraintViolationException
+        && ex.getCause().getMessage().contains("task_user_unique")){
+            HttpStatus status = HttpStatus.CONFLICT;
+            return getErrorResponse(status, "이미 존재하는 Task-User 매핑입니다");
+        }
+        return getErrorResponse(HttpStatus.BAD_REQUEST, "데이터 무결성 오류가 발생했습니다");
+    }
+
+    public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, Object message) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 message,
                 status.getReasonPhrase()

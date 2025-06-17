@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
+// Front URL 매칭 필요
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    // Todo 공통 Response 완료시 응답 적용하기
+
     @PostMapping("/register")
     public ResponseEntity<ResponseDto<UserSignupResponseDto>> signup(
             @Valid @RequestBody UserSignupRequestDto requestDto

@@ -131,23 +131,19 @@ public class ActionLoggingAspect {
         return null;
     }
 
-
     private String getClientIpAddress() {
         ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (sra != null) {
-            HttpServletRequest request = sra.getRequest();
-            if (request != null) { // 추가: request가 null인지 확인
-                // X-Forwarded-For 헤더
-                String xForwardedFor = request.getHeader("x-forwarded-for");
-                if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-                    // 여러 IP가 있는 경우 첫 번째 IP 반환
-                    String ip = xForwardedFor.split(",")[0].trim();
-                    return "X-Forwarded-For:" + ip;
-                }
-            }
+        HttpServletRequest request = sra.getRequest();
+        String xForwardedFor = request.getHeader("x-forwarded-for");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            String ip = xForwardedFor.split(",")[0].trim();
+            return ip;
         }
-        return "X-Forwarded-For:unknown";
+
+        return request.getRemoteAddr();
     }
+
+
 
     private String getRequestMethod() {
         ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
