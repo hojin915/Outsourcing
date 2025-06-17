@@ -4,6 +4,9 @@ import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.service.CommentService;
 import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.entity.AuthUser;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -99,4 +102,34 @@ public class CommentController {
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    // 태스크 댓글 검색 기능
+    @GetMapping("/{task_id}/search")
+    public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentFindTaskSearch (@PathVariable("task_id") Long taskId,
+                                                                            @RequestBody CommentSearchRequestDto requestDto) {
+
+        List<CommentDataDto> commentSearch = commentService.commentFindTaskSearch(taskId, requestDto.getSearch());
+
+        ResponseDto<List<CommentDataDto>> responseDto = new ResponseDto<>(
+                "댓글 검색이 완료되었습니다.",
+                commentSearch
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
+    // 전체 댓글 검색 기능
+    @GetMapping("/search")
+    public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentfindAllSearch (@RequestBody CommentSearchRequestDto requestDto) {
+
+        List<CommentDataDto> commentSearch = commentService.commentfindAllSearch(requestDto.getSearch());
+
+        ResponseDto<List<CommentDataDto>> responseDto = new ResponseDto<>(
+                "댓글 검색이 완료되었습니다.",
+                commentSearch
+        );
+
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+
 }
