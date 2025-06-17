@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public class ErrorResponseDto extends ResponseDto<Void> {
 
-    private final String errorCode;
+    private final Object errorCode;
 
-    public ErrorResponseDto(String message, String errorCode) {
+    public ErrorResponseDto(Object message, String errorCode) {
         super(message, null);
         this.success = false;
         this.errorCode = errorCode;
