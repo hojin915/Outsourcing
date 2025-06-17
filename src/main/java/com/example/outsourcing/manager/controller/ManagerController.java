@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/tasks/{taskId}/manager")
+@RequestMapping("/api/tasks/{taskId}/managers")
 @RequiredArgsConstructor
 public class ManagerController {
     private final ManagerService managerService;

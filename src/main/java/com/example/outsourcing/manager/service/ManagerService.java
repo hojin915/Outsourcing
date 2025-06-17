@@ -23,17 +23,14 @@ public class ManagerService {
     private final ManagerRepository managerRepository;
 
     public ManagerResponseDto registerManager(String username, Long taskId, ManagerRequestDto requestDto) {
-        // 토큰 유저 정보로 유저 찾을 수 없을시 예외처리
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+        // 로그인한 유저
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
-        // 등록하려는 유저 찾을 수 없을시 예외처리
-        User targetUser = userRepository.findById(requestDto.getTargetId())
-                .orElseThrow(() -> new NotFoundException("등록할 유저를 찾을 수 없습니다."));
+        // 등록하려는 유저
+        User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetId());
 
-        // 일정을 찾을 수 없을시 예외처리
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundException("등록할 일정을 찾을 수 없습니다."));
+        // 매니저 등록할 일정
+        Task task = taskRepository.findByIdOrElseThrow(taskId);
 
         isValidManagerRequest(user, task, targetUser);
 
@@ -44,17 +41,14 @@ public class ManagerService {
     }
 
     public ManagerResponseDto deleteManager(String username, Long taskId, ManagerRequestDto requestDto) {
-        // 토큰 유저 정보로 유저 찾을 수 없을시 예외처리
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다."));
+        // 로그인한 유저
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
-        // 등록하려는 유저 찾을 수 없을시 예외처리
-        User targetUser = userRepository.findById(requestDto.getTargetId())
-                .orElseThrow(() -> new NotFoundException("등록할 유저를 찾을 수 없습니다."));
+        // 등록하려는 유저
+        User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetId());
 
-        // 일정을 찾을 수 없을시 예외처리
-        Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new NotFoundException("등록할 일정을 찾을 수 없습니다."));
+        // 매니저 등록할 일정
+        Task task = taskRepository.findByIdOrElseThrow(taskId);
 
         isValidManagerRequest(user, task, targetUser);
 
@@ -70,7 +64,7 @@ public class ManagerService {
     private void isValidManagerRequest(User user, Task task, User targetUser) {
         // 삭제된 유저일 때 예외처리
         if(user.isDeleted() || targetUser.isDeleted()) {
-            throw new UnauthorizedException("탈퇴한 유저입니다.");
+            throw new CustomException(ExceptionCode.DELETED_USER);
         }
 
         // 본인이 본인을 task 의 담당자로 등록하려는 경우 예외처리

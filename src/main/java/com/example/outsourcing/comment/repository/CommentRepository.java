@@ -2,6 +2,7 @@ package com.example.outsourcing.comment.repository;
 
 import com.example.outsourcing.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c FROM Comment c WHERE c.isDeleted = false AND LOWER(c.comment) LIKE LOWER(CONCAT('%',:search,'%')) ORDER BY c.createdAt DESC ")
     List<Comment> findAllSearch  (String search);
 
+    @Modifying
+    @Query("UPDATE Comment c SET c.isDeleted = true, c.deletedAt = CURRENT_TIMESTAMP WHERE c.user.id = :userId")
+    void softDeleteCommentsByUserId(@Param("userId") Long userId);
 }
