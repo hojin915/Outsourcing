@@ -104,6 +104,20 @@ public class CommentService {
 
         Comment commentUpdate = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
+        if (commentUpdate == null) {
+            throw new CustomException(COMMENT_NOT_FOUND);
+        }
+
+        // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
+        if(comment == null || comment.trim().isEmpty()) {
+            throw new CustomException(COMMENT_BAD_REQUEST);
+        }
+
+        // 입력받은 값이 기존 값과 같을 경우 예외처리
+        if(comment.equals(commentUpdate.getComment())) {
+            throw new CustomException(COMMENT_UPDATED_BAD_REQUEST);
+        }
+
         commentUpdate.setComment(comment);
 
         return CommentDataDto.toDto(commentUpdate);

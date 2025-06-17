@@ -21,6 +21,7 @@ public enum ExceptionCode {
 
     INVALID_TASK_ID(HttpStatus.BAD_REQUEST, "태스크 아이디 경로를 찾을 수 없습니다."),
     COMMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "내용을 입력해야합니다"),
+    COMMENT_UPDATED_BAD_REQUEST(HttpStatus.BAD_REQUEST, "기존 내용과 동일한 내용입니다"),
 
     WRONG_PASSWORD(HttpStatus.UNAUTHORIZED, "비밀번호가 틀렸습니다");
 
