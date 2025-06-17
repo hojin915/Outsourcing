@@ -1,6 +1,7 @@
 package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
+import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.NotFoundException;
 import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
