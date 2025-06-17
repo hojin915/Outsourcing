@@ -1,6 +1,7 @@
 package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
+import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.NotFoundException;
 import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleNotFoundException(NotFoundException ex) {
         HttpStatus status = HttpStatus.NOT_FOUND;
+        return getErrorResponse(status, ex.getMessage());
+    }
+
+    // CustomException 추가, 사용시 enum 코드 또는 enum 코드 + 원하는 메세지
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException ex) {
+        HttpStatus status = ex.getExceptionCode().getHttpStatus();
         return getErrorResponse(status, ex.getMessage());
     }
 
