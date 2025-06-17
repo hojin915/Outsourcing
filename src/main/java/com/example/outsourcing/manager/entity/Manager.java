@@ -4,10 +4,16 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-public class Manager{
+@NoArgsConstructor
+@Table(uniqueConstraints = {
+        @UniqueConstraint(name = "task_user_unique", columnNames = {"task_id", "user_id"})
+    }
+)
+public class Manager {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,7 +26,7 @@ public class Manager{
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public Manager(Task task, User user){
+    public Manager(Task task, User user) {
         this.task = task;
         this.user = user;
     }

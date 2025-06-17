@@ -6,7 +6,7 @@ import com.example.outsourcing.dashboard.dto.OverdueCountDto;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
-import com.example.outsourcing.dashboard.repository.TaskRepository;
+import com.example.outsourcing.task.repository.TaskRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

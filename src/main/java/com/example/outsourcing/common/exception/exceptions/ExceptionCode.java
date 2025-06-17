@@ -9,6 +9,7 @@ public enum ExceptionCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"),
     TASK_NOT_FOUND(HttpStatus.NOT_FOUND, "일정을 찾을 수 없습니다"),
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다"),
+    MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "담당자를 찾을 수 없습니다"),
 
     DELETED_EMAIL(HttpStatus.GONE, "삭제된 이메일입니다"),
     DELETED_USERNAME(HttpStatus.GONE, "삭제된 아이디입니다"),

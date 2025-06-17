@@ -4,6 +4,8 @@ import com.example.outsourcing.common.dto.ErrorResponseDto;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.NotFoundException;
 import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +38,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException ex) {
         HttpStatus status = ex.getExceptionCode().getHttpStatus();
         return getErrorResponse(status, ex.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        if(ex.getCause() instanceof ConstraintViolationException
+        && ex.getCause().getMessage().contains("task_user_unique")){
+            HttpStatus status = HttpStatus.CONFLICT;
+            return getErrorResponse(status, "이미 존재하는 Task-User 매핑입니다");
+        }
+        return getErrorResponse(HttpStatus.BAD_REQUEST, "데이터 무결성 오류가 발생했습니다");
     }
 
     public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, String message) {

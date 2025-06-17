@@ -6,8 +6,7 @@ import com.example.outsourcing.dashboard.dto.OverdueCountDto;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
-import com.example.outsourcing.dashboard.repository.TaskRepository;
-
+import com.example.outsourcing.task.repository.TaskRepository;
 import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.Query;
