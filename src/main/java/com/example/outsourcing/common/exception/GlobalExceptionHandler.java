@@ -1,12 +1,13 @@
 package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
+import com.example.outsourcing.common.exception.exceptions.NotFoundException;
+import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -17,13 +18,22 @@ public class GlobalExceptionHandler {
         return getErrorResponse(status, ex.getMessage());
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponseDto> handleUnauthorizedException(UnauthorizedException ex) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        return getErrorResponse(status, ex.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotFoundException(NotFoundException ex) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return getErrorResponse(status, ex.getMessage());
+    }
+
     public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, String message) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                false,
-                message + " : " + status.getReasonPhrase(),
-                null,
-                status.getReasonPhrase(),
-                LocalDateTime.now().toString()
+                message,
+                status.getReasonPhrase()
         );
         return new ResponseEntity<>(errorResponseDto, status);
     }

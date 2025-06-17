@@ -4,7 +4,7 @@ import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.user.entity.User;
 import lombok.Getter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 public class UserSignupResponseDto {
@@ -13,8 +13,8 @@ public class UserSignupResponseDto {
     private String email;
     private String name;
     private UserRole userRole;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public UserSignupResponseDto(User user) {
         this.id = user.getId();
@@ -22,7 +22,7 @@ public class UserSignupResponseDto {
         this.email = user.getEmail();
         this.name = user.getName();
         this.userRole = user.getUserRole();
-        // this.createdAt = user.getCreatedAt;
-        // this.updatedAt = user.getUpdatedAt;
+        this.createdAt = user.getCreatedAt();
+        this.updatedAt = user.getUpdatedAt();
     }
 }
