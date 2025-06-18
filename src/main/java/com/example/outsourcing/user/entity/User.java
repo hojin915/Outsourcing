@@ -42,5 +42,10 @@ public class User extends SoftDeleteEntity {
         this.userRole = userRole;
     }
 
+    // 테스트코드용 생성자
+    public User(Long id) {
+        this.id = id;
+    }
+
     // image
 }

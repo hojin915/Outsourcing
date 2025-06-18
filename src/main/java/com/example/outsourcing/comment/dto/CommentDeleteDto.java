@@ -2,6 +2,7 @@ package com.example.outsourcing.comment.dto;
 
 import com.example.outsourcing.comment.entity.Comment;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ public class CommentDeleteDto {
     private final LocalDateTime modifiedAt;
     private final boolean isDeleted;
     private final LocalDateTime deletedAt;
+    private final Long targetId;
 
     // 댓글 생성자
     public CommentDeleteDto(
@@ -29,7 +31,8 @@ public class CommentDeleteDto {
             LocalDateTime createdAt,
             LocalDateTime modifiedAt,
             boolean isDeleted,
-            LocalDateTime deletedAt
+            LocalDateTime deletedAt,
+            Long targetId
     ) {
         this.commentId = commentId;
         this.taskId = taskId;
@@ -40,10 +43,11 @@ public class CommentDeleteDto {
         this.modifiedAt = modifiedAt;
         this.isDeleted = isDeleted;
         this.deletedAt = deletedAt;
+        this.targetId = targetId;
     }
 
     // 댓글 삭제 생성자 (Comment를 CommentDeleteDto타입으로 변환)
-    public static CommentDeleteDto toDto(Comment comment) {
+    public static CommentDeleteDto toDto(Comment comment, Long targetId) {
         return new CommentDeleteDto(
                 comment.getCommentId(),
                 comment.getTask().getId(),
@@ -53,7 +57,8 @@ public class CommentDeleteDto {
                 comment.getCreatedAt(),
                 comment.getUpdatedAt(),
                 comment.isDeleted(),
-                comment.getDeletedAt()
+                comment.getDeletedAt(),
+                targetId
         );
     }
 }
