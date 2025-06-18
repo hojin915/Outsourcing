@@ -18,6 +18,8 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+ List<Task> findByIsDeletedFalse();
+
    @Query("""
     SELECT t FROM Task t
     WHERE (:status IS NULL OR t.status = :status)

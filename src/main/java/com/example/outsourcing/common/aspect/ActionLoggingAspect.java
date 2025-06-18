@@ -2,6 +2,7 @@ package com.example.outsourcing.common.aspect;
 
 import com.example.outsourcing.activitylog.entity.ActivityLog;
 import com.example.outsourcing.activitylog.service.ActivityLogService;
+import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.common.entity.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +10,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -38,54 +43,33 @@ public class ActionLoggingAspect {
 
         //작업 시간
         LocalDateTime requestTime = LocalDateTime.now();
-        // 현재 요청의 IP 주소를 가져오는 메서드 : ex) X-Forwarded-For:unknown
+        // 현재 요청의 IP 주소를 가져오는 메서드
         String clientIpAddress = getClientIpAddress();
         // HTTP 메서드 (GET, POST 등)
         String requestMethod = getRequestMethod();
-        // RequestUrl
+        // RequestUrl 메서드
         String requestUrl = getRequestUrl();
         // 현재 로그인된 사용자 ID 추출
         String loggedInUserId = getCurrentLoggedInUserId();
 
-//        Long targetId = getTargetIdFromToken();
-
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
-
-        String activityType = null;
-        if (methodName.equals("signup")) {
-            activityType = "USER_SIGNUP";
-        } else if (methodName.equals("login")) {
-            activityType = "USER_LOGIN";
-        } else if (methodName.equals("profile")) {
-            activityType = "USER_PROFILE";
-        } else if (methodName.equals("delete")) {
-            activityType = "USER_DELETE";
-        } else if (methodName.equals("delete")) {
-            activityType = "USER_DELETE";
-        } else if (methodName.equals("commentCreated")) {
-            activityType = "COMMENT_CREATED";
-        } else if (methodName.equals("commentFindAll")) {
-            activityType = "COMMENT_FIND_ALL";
-        } else if (methodName.equals("commentFindById")) {
-            activityType = "COMMENT_FIND_BY_ID";
-        } else if (methodName.equals("commentUpdate")) {
-            activityType = "COMMENT_UPDATED";
-        } else if (methodName.equals("commentdelete")) {
-            activityType = "COMMENT_DELETED";
-        }
+        // activityType
+        String activityType = (methodName != null) ? methodName.toUpperCase() : null;
 
         Object result = null;
+        Long targetId = null;
 
         try {
             result = joinPoint.proceed();
+//            targetId = extractTargetIdFromResponse(result);
         } finally {
             long endTime = System.currentTimeMillis();
             Long executionTimeMs = endTime - startTime;
 
             Long userIdToLog = null;
             if (methodName.equals("signup") || methodName.equals("login")) {
-                userIdToLog = -1L;
+                userIdToLog = -1L; // 회원가입/로그인 시 초기 사용자 ID는 -1로 로깅
             } else if (loggedInUserId != null && !loggedInUserId.equals("anonymous")) {
                 try {
                     userIdToLog = Long.valueOf(loggedInUserId);
@@ -93,8 +77,7 @@ public class ActionLoggingAspect {
                     log.error("Error converting loggedInUserId to Long: " + loggedInUserId, e);
                 }
             }
-
-            // null 체크 및 로그 기록
+            // 필요한 정보가 모두 있을 때만 활동 로그 저장
             if (userIdToLog != null && activityType != null) {
                 ActivityLog activityLog = ActivityLog.builder()
                         .requestTime(requestTime)
@@ -103,7 +86,7 @@ public class ActionLoggingAspect {
                         .requestMethod(requestMethod)
                         .requestUrl(requestUrl)
                         .activityType(activityType)
-//                        .targetId(targetId)
+//                        .targetId(targetId) // 추출한 targetId 사용
                         .executionTimeMs(executionTimeMs)
                         .build();
 
@@ -111,16 +94,27 @@ public class ActionLoggingAspect {
 
             } else {
                 String missingInfo = "경고: 활동 로그 저장 실패 - 필수 정보 누락. " +
-                        "LoggedInUserId: " + loggedInUserId +
-                        ", ActivityType: " + activityType +
-//                        ", TargetId: " + targetId +
-                        ", ExecutionTimeMs: " + executionTimeMs +
-                        ", Method: " + joinPoint.getSignature().getName();
+                        "로그인된 사용자 ID: " + loggedInUserId +
+                        ", 활동 유형: " + activityType +
+//                        ", 대상 ID: " + (targetId != null ? targetId : "null") +
+                        ", 실행 시간: " + executionTimeMs +
+                        ", 메서드: " + joinPoint.getSignature().getName();
                 log.warn(missingInfo);
             }
         }
         return result;
     }
+
+//    private Long extractTargetIdFromResponse(Object responseObject) {
+//        // 응답 객체가 TargetIdentifiable 인터페이스를 구현했는지 확인
+//        if (responseObject instanceof TargetIdentifiable) {
+//            Long extractedId = ((TargetIdentifiable) responseObject).getTargetId();
+//            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출: {}", extractedId);
+//            return extractedId;
+//        }
+//        return null;
+//    }
+
 
     private String getCurrentLoggedInUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -142,7 +136,6 @@ public class ActionLoggingAspect {
 
         return request.getRemoteAddr();
     }
-
 
 
     private String getRequestMethod() {
