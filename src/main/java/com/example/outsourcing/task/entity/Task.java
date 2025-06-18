@@ -2,6 +2,7 @@ package com.example.outsourcing.task.entity;
 
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.common.entity.SoftDeleteEntity;
+import com.example.outsourcing.manager.entity.Manager;
 import com.example.outsourcing.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,6 +51,9 @@ public class Task extends SoftDeleteEntity {
 
     @OneToMany(mappedBy = "task")
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.PERSIST)
+    private List<Manager> managers = new ArrayList<>();
 
     public enum Priority {
         LOW, MEDIUM, HIGH
