@@ -2,11 +2,13 @@ package com.example.outsourcing.common.dto;
 
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class ErrorResponseDto extends ResponseDto<Void> {
 
-    private final String errorCode;
+    private String errorCode;
 
     public ErrorResponseDto(Object message, String errorCode) {
         super(message, null);

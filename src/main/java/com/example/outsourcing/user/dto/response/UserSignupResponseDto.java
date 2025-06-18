@@ -1,13 +1,17 @@
 package com.example.outsourcing.user.dto.response;
 
+import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.user.entity.User;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class UserSignupResponseDto {
+@NoArgsConstructor
+public class UserSignupResponseDto implements TargetIdentifiable {
     private Long id;
     private String username;
     private String email;
@@ -15,6 +19,9 @@ public class UserSignupResponseDto {
     private UserRole userRole;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Setter
+    private Long targetId;
 
     public UserSignupResponseDto(User user) {
         this.id = user.getId();
