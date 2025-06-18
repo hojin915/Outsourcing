@@ -1,16 +1,18 @@
 package com.example.outsourcing.comment.service;
 
-import com.example.outsourcing.comment.dto.CommentDataDto;
-import com.example.outsourcing.comment.dto.CommentDeleteDto;
+import com.example.outsourcing.comment.dto.*;
+import com.example.outsourcing.comment.dto.CommentListResponseDto;
+import com.example.outsourcing.comment.dto.CommentSearchResponseDto;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
+import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -62,16 +64,19 @@ public class CommentService {
 
     // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentFindAll(Long taskId) {
+    public CommentListResponseDto  commentFindAll(Long taskId, AuthUser authUser) {
 
         // 태스크가 존재하지 않을 때 예외처리
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
-        return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId())
+        List<CommentListResponseDto> commentList =
+                commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId())
                 .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))// Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
+                .map(comment -> CommentListResponseDto.fromEntity(comment))
                 .toList();
+
+        return CommentListResponseDto.fromList(commentList, authUser.getId());
     }
 
     // 댓글 단건 조회 비지니스 로직
@@ -142,7 +147,7 @@ public class CommentService {
 
     // 태스크별 댓글 검색 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentFindTaskSearch(Long taskId, String search) {
+    public CommentSearchResponseDto commentFindTaskSearch(Long taskId, String search, AuthUser authUser) { // AuthUser 파라미터 추가
         // 태스크가 존재하지 않을 때 예외처리
         taskRepository.findById(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
@@ -152,25 +157,30 @@ public class CommentService {
             throw new CustomException(COMMENT_BAD_REQUEST);
         }
 
-        return commentRepository.findByTaskIdAndSearch(taskId, search)
+        List<CommentSearchResponseDto> searchResults = commentRepository.findByTaskIdAndSearch(taskId, search)
                 .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
+                .map(comment -> CommentSearchResponseDto.fromEntity(comment)) // 개별 댓글 DTO 생성
                 .toList();
+
+        return CommentSearchResponseDto.fromList(searchResults, authUser.getId());
+
     }
 
     // 전체 댓글 검색 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentfindAllSearch(String search) {
+    public CommentAllSearchResponseDto commentfindAllSearch(String search, AuthUser authUser) {
 
         // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
         if(search == null || search.trim().isEmpty()) {
             throw new CustomException(COMMENT_BAD_REQUEST);
         }
 
-        return commentRepository.findAllSearch(search)
+        List<CommentAllSearchResponseDto> searchResults = commentRepository.findAllSearch(search)
                 .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
+                .map(comment -> CommentAllSearchResponseDto.fromEntity(comment))
                 .toList();
+
+        return CommentAllSearchResponseDto.fromList(searchResults, authUser.getId());
     }
 
     public void softDeleteComments(List<Long> taskIds) {
