@@ -2,7 +2,6 @@ package com.example.outsourcing.comment.dto;
 
 import com.example.outsourcing.comment.entity.Comment;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +13,7 @@ public class CommentDeleteDto {
     private final Long taskId;
     private final Long userId;
     private final String username;
-    private final String comment;
+    private final String content;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
     private final boolean isDeleted;
@@ -27,7 +26,7 @@ public class CommentDeleteDto {
             Long taskId,
             Long userId,
             String username,
-            String comment,
+            String content,
             LocalDateTime createdAt,
             LocalDateTime modifiedAt,
             boolean isDeleted,
@@ -38,7 +37,7 @@ public class CommentDeleteDto {
         this.taskId = taskId;
         this.userId = userId;
         this.username = username;
-        this.comment = comment;
+        this.content = content;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
         this.isDeleted = isDeleted;

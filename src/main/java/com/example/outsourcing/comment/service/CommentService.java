@@ -10,10 +10,12 @@ import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.example.outsourcing.common.exception.exceptions.ExceptionCode.*;
 
@@ -41,7 +43,7 @@ public class CommentService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         // 태스크 예외처리
-        Task task = taskRepository.findById(taskId)
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
         // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
@@ -62,16 +64,17 @@ public class CommentService {
 
     // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentFindAll(Long taskId) {
+    public Page<CommentDataDto> commentFindAll(Long taskId, Pageable pageable) {
 
         // 태스크가 존재하지 않을 때 예외처리
-        Task task = taskRepository.findById(taskId)
+        Task task = taskRepository.findByIdAndIsDeletedFalse(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
-        return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId())
-                .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))// Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
-                .toList();
+        Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Comment> response = commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId(), commentPageble);
+
+        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
     }
 
     // 댓글 단건 조회 비지니스 로직
@@ -90,9 +93,18 @@ public class CommentService {
 
     // 댓글 수정 비지니스 로직
     @Transactional
-    public CommentDataDto commentUpdate(Long userId, Long commentId, String comment) {
+    public CommentDataDto commentUpdate(Long userId, Long taskId, Long commentId, String comment) {
+
+        // 태스크가 존재하지 않을 때 예외처리
+        taskRepository.findByIdAndIsDeletedFalse(taskId)
+                .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
         Comment commentUpdate = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
+
+        // 입력받은 taskId와 입력받은 commentId의 taskId가 다를 시 예외처리
+        if (!commentUpdate.getTask().getId().equals(taskId)) {
+            throw new CustomException(TASK_COMMENT_MISMATCH);
+        }
 
         if (commentUpdate == null) {
             throw new CustomException(COMMENT_NOT_FOUND);
@@ -120,9 +132,18 @@ public class CommentService {
 
     // 댓글 삭제 비지니스 로직
     @Transactional
-    public CommentDeleteDto commentdelete(Long userId, Long commentId) {
+    public CommentDeleteDto commentdelete(Long userId, Long taskId, Long commentId) {
+
+        // 태스크가 존재하지 않을 때 예외처리
+        taskRepository.findByIdAndIsDeletedFalse(taskId)
+                .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
         Comment comment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
+
+        // 입력받은 taskId와 입력받은 commentId의 taskId가 다를 시 예외처리 (다른 태스크에 작성된 댓글인 경우)
+        if (!comment.getTask().getId().equals(taskId)) {
+            throw new CustomException(TASK_COMMENT_MISMATCH);
+        }
 
         // 댓글이 존재하지 않을 경우 예외처리
         if (comment == null) {
@@ -142,9 +163,9 @@ public class CommentService {
 
     // 태스크별 댓글 검색 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentFindTaskSearch(Long taskId, String search) {
+    public Page<CommentDataDto> commentFindTaskSearch(Long taskId,Pageable pageable, String search) {
         // 태스크가 존재하지 않을 때 예외처리
-        taskRepository.findById(taskId)
+        taskRepository.findByIdAndIsDeletedFalse(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
         // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
@@ -152,24 +173,25 @@ public class CommentService {
             throw new CustomException(COMMENT_BAD_REQUEST);
         }
 
-        return commentRepository.findByTaskIdAndSearch(taskId, search)
-                .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
-                .toList();
+        Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
+        Page<Comment> response = commentRepository.findByTaskIdAndSearch(taskId, commentPageble, search);
+
+        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
     }
 
     // 전체 댓글 검색 비지니스 로직
     @Transactional
-    public List<CommentDataDto> commentfindAllSearch(String search) {
+    public Page<CommentDataDto> commentfindAllSearch(Pageable pageable, String search) {
 
         // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
         if(search == null || search.trim().isEmpty()) {
             throw new CustomException(COMMENT_BAD_REQUEST);
         }
+        Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        return commentRepository.findAllSearch(search)
-                .stream()
-                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
-                .toList();
+        Page<Comment> response = commentRepository.findAllSearch(commentPageble, search);
+
+        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
     }
 }
