@@ -85,4 +85,26 @@ public class CommentServiceTest {
 
     }
 
+    @Test
+    void 댓글_단건_조회_서비스_단위_테스트() {
+
+        // given
+        Long taskId = 1L;
+        Long commentId = 1L;
+        String testText = "테스트 댓글입니다.";
+
+        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
+        Task task = new Task(taskId);
+        Comment comment = new Comment(task, user, testText);
+
+        when(commentRepository.findByCommentIdAndIsDeletedFalse(commentId)).thenReturn(comment);
+
+        // when
+        CommentDataDto commentFindById = commentService.commentFindById(commentId);
+
+        // then
+        assertNotNull("댓글이 존재하지 않습니다.", commentFindById);
+
+    }
+
 }
