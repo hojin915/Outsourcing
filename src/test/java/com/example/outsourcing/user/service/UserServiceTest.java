@@ -1,16 +1,16 @@
-package com.example.outsourcing;
+package com.example.outsourcing.user.service;
 
 import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import com.example.outsourcing.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +49,7 @@ public class UserServiceTest {
     private String name;
     private User user;
 
+    // 유저 세팅
     @BeforeEach
     void setUp() {
         username = "TestUserName";
@@ -96,7 +97,7 @@ public class UserServiceTest {
         // when & then
         CustomException exception = assertThrows(CustomException.class,
                 () -> userService.signup(request));
-        assertEquals("이미 존재하는 이메일입니다", exception.getMessage());
+        assertEquals(ExceptionCode.ALREADY_EXISTS_EMAIL, exception.getExceptionCode());
     }
 
     @Test
@@ -109,7 +110,7 @@ public class UserServiceTest {
         // when & then
         CustomException exception = assertThrows(CustomException.class,
                 () -> userService.signup(request));
-        assertEquals("이미 존재하는 아이디입니다", exception.getMessage());
+        assertEquals(ExceptionCode.ALREADY_EXISTS_USERNAME, exception.getExceptionCode());
     }
 
     @Test
@@ -117,7 +118,7 @@ public class UserServiceTest {
         // given
         UserLoginRequestDto request = new UserLoginRequestDto(username, password);
         String testToken = UUID.randomUUID().toString();
-        when(userRepository.findByUsernameOrElseThrow(anyString())).thenReturn(user);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtUtil.createToken(anyLong(), anyString(), any(UserRole.class))).thenReturn(testToken);
 
@@ -130,14 +131,46 @@ public class UserServiceTest {
     }
 
     @Test
-    public void auth_로그인_아이디_없을시_예외처리() {
+    public void auth_아이디_없을시_예외처리() {
         // given
-        UserLoginRequestDto request = new UserLoginRequestDto(username, password);
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
         // when & then
         CustomException exception = assertThrows(CustomException.class,
-                () -> userService.login(request));
-        assertEquals("유저를 찾을 수 없습니다", exception.getMessage());
+                () -> userService.findByUsernameOrElseThrow(username));
+        assertEquals(ExceptionCode.USER_NOT_FOUND, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_삭제된_유저시_예외처리() {
+        // given
+        ReflectionTestUtils.setField(user, "isDeleted", true);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.commonUserCheck(user, password));
+        assertEquals(ExceptionCode.DELETED_USER, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_비밀번호_틑릴시_예외처리() {
+        // given
+        ReflectionTestUtils.setField(user, "isDeleted", false);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.commonUserCheck(user, password));
+        assertEquals(ExceptionCode.WRONG_PASSWORD, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_프로필_조회_정상작동() {
+        // given
+
+        // when
+
+        // then
+
     }
 }

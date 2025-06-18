@@ -77,8 +77,7 @@ public class UserService {
     }
 
     public UserProfileResponseDto getProfile(String username) {
-        User totalUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+        User totalUser = findByUsernameOrElseThrow(username);
 
         UserProfileResponseDto responseDto = new UserProfileResponseDto(totalUser);
 
@@ -103,7 +102,7 @@ public class UserService {
     }
 
     // 공통 예외 처리
-    private void commonUserCheck(User user, String password) {
+    public void commonUserCheck(User user, String password) {
         // 삭제된 유저시 예외처리
         if(user.isDeleted()) {
             throw new CustomException(ExceptionCode.DELETED_USER);
@@ -115,6 +114,7 @@ public class UserService {
         }
     }
 
+    // username 으로 유저 못찾을 경우 예외처리
     // 예외처리 Repository -> Service 이동
     // 기존 사용으로 인해 Repository 내부 메서드 유지
     public User findByUsernameOrElseThrow(String username) {
