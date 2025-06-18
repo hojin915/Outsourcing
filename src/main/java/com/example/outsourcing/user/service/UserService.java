@@ -9,6 +9,7 @@ import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.manager.repository.ManagerRepository;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.task.service.TaskServiceImpl;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
@@ -22,14 +23,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TaskServiceImpl taskServiceImpl;
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
+    private final ManagerRepository managerRepository;
 
     public UserSignupResponseDto signup(UserSignupRequestDto request) {
         String username = request.getUsername();
@@ -101,6 +107,10 @@ public class UserService {
         user.softDelete();
         taskRepository.softDeleteTasksByUserId(user.getId());
         commentRepository.softDeleteCommentsByUserId(user.getId());
+        managerRepository.softDeleteManagersByUserId(user.getId());
+        List<Long> taskIds = taskRepository.findTaskIdsByUserId(user.getId());
+        managerRepository.softDeleteManagersByTaskIds(taskIds);
+        commentRepository.softDeleteCommentsByTaskIds(taskIds);
 
         return new UserDeleteResponseDto(user.getId());
     }

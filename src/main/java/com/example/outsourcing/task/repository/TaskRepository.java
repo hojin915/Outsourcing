@@ -18,21 +18,21 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
- List<Task> findByIsDeletedFalse();
+    List<Task> findByIsDeletedFalse();
 
-   @Query("""
-    SELECT t FROM Task t
-    WHERE (:status IS NULL OR t.status = :status)
-      AND (
-        (:keyword IS NULL OR TRIM(:keyword) = '')
-        OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      )
-    ORDER BY t.createdAt DESC
-""")
-   Page<Task> findByCondition(@Param("status") Task.Status status,
-                              @Param("keyword") String keyword,
-                              Pageable pageable);
+    @Query("""
+                SELECT t FROM Task t
+                WHERE (:status IS NULL OR t.status = :status)
+                  AND (
+                    (:keyword IS NULL OR TRIM(:keyword) = '')
+                    OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                  )
+                ORDER BY t.createdAt DESC
+            """)
+    Page<Task> findByCondition(@Param("status") Task.Status status,
+                               @Param("keyword") String keyword,
+                               Pageable pageable);
 
     Optional<Task> findById(Long id);
 
@@ -53,7 +53,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByTitleContainingOrContentContaining(String title, String content);
 
     /**
-     *
      * @return 삭제되지않은 총 태스크 개수
      */
     @Query("SELECT COUNT(t) FROM Task t WHERE t.isDeleted = false")
@@ -61,6 +60,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     /**
      * TODO, IN_PROGRESS, DONE 상태별 테스크 개수 조회
+     *
      * @return 리스트에 object(status, long)으로 저장
      */
     @Query("SELECT t.status, COUNT(t) FROM Task t WHERE t.isDeleted = false GROUP BY t.status")
@@ -74,6 +74,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     /**
      * 마감일을지난 TODO 또는 IN_PROGRESS 상태인 태스크 개수 조회
+     *
      * @return 기한 초과된 태스크 개수
      */
     @Query("SELECT COUNT(t) FROM Task t " +
@@ -86,11 +87,21 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     );
 
     @Query("""
-        SELECT t FROM Task t WHERE t.status = :status
-        ORDER BY 
-        CASE t.priority 
-        WHEN 'HIGH' THEN 1 
-        WHEN 'MEDIUM' THEN 2 
-        WHEN 'LOW' THEN 3 END ASC""")
+            SELECT t FROM Task t WHERE t.status = :status
+            ORDER BY 
+            CASE t.priority 
+            WHEN 'HIGH' THEN 1 
+            WHEN 'MEDIUM' THEN 2 
+            WHEN 'LOW' THEN 3 END ASC""")
     List<Task> findTaskSortedByPriority(@Param("status") Task.Status status);
+
+    /**
+     * @param status
+     * @return 파라미터 상태에 해당하는 태스크를 우선사항에따라 조회
+     */
+    List<Task> findByStatusOrderByPriorityDesc(Task.Status status);
+
+    @Query("SELECT t.id from Task t WHERE t.user.id = :userId and t.isDeleted = false")
+    List<Long> findTaskIdsByUserId(@Param("userId") Long userId);
+
 }
