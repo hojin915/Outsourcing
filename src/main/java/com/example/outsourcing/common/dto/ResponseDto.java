@@ -13,11 +13,11 @@ import java.time.format.DateTimeFormatter;
 public class ResponseDto<T> {
 
     boolean success;
-    private Object message;
+    private String message;
     private T data;
     private String timestamp;
 
-    public ResponseDto(Object message, T data) {
+    public ResponseDto(String message, T data) {
         this.success = true;
         this.message = message;
         this.data = data;

@@ -182,4 +182,8 @@ public class CommentService {
 
         return CommentAllSearchResponseDto.fromList(searchResults, authUser.getId());
     }
+
+    public void softDeleteComments(List<Long> taskIds) {
+        commentRepository.softDeleteCommentsByTaskIds(taskIds);
+    }
 }

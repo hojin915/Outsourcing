@@ -1,5 +1,6 @@
 package com.example.outsourcing.dashboard.service;
 
+import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
@@ -89,19 +90,32 @@ public class DashBoardService {
     public Long getOverdueTaskCount() {
         return taskRepository.countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS);
     }
-    /**
-     *TODO 상태의 태스크 목록을 우선순위 기준으로 정렬
+
+
+    /**TODO 상태의 태스크 목록을 우선순위 기준으로 정렬
+     *
+     * @return
      */
     @Transactional(readOnly = true)
-    public List<Task> getTodoSortedByPriority() {
-        return taskRepository.findByStatusOrderByPriorityDesc(Task.Status.TODO);
+    public List<TaskByPriorityDto> todoSortedByPriority() {
+        List<Task> todoTasks = taskRepository.findTaskSortedByPriority(Task.Status.TODO);
+
+        return todoTasks.stream()
+                .map(TaskByPriorityDto::new)
+                .toList();
     }
-    /**
-     * IN_PROGRESS 상태의 태스크 목록을 우선순위 기준으로 정렬
+    /**IN_PROGRESS 상태의 태스크 목록을 우선순위 기준으로 정렬
+     *
+     * @return
      */
     @Transactional(readOnly = true)
-    public List<Task> getInProgressSortedByPriority() {
-        return taskRepository.findByStatusOrderByPriorityDesc(Task.Status.IN_PROGRESS);
+    public List<TaskByPriorityDto> inProgressSortedByPriority() {
+        List<Task> todoTasks = taskRepository.findTaskSortedByPriority(Task.Status.IN_PROGRESS);
+
+        return todoTasks.stream()
+                .map(TaskByPriorityDto::new)
+                .toList();
     }
+
 
 }

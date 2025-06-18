@@ -9,6 +9,10 @@ import lombok.Getter;
 @Getter
 public class UserSignupRequestDto {
 
+    @Size(min = 2, max = 50, message = "이름은 2-50자 사이여야 합니다")
+    @NotBlank(message = "이름은 필수입니다")
+    private final String name;
+
     @Pattern(regexp = "^[a-zA-Z0-9]{4,20}$",
             message = "사용자명은 4-20자의 영문/숫자만 허용됩니다")
     @NotBlank(message = "사용자명은 필수입니다")
@@ -22,10 +26,6 @@ public class UserSignupRequestDto {
             message = "비밀번호는 8자 이상의 영문/숫자/특수문자 조합이어야 합니다")
     @NotBlank(message = "비밀번호는 필수입니다")
     private final String password;
-
-    @Size(min = 2, max = 50, message = "이름은 2-50자 사이여야 합니다")
-    @NotBlank(message = "이름은 필수입니다")
-    private final String name;
 
     public UserSignupRequestDto(String username, String email, String password, String name) {
         this.username = username;

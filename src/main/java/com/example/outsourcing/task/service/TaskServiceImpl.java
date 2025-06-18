@@ -1,6 +1,9 @@
 package com.example.outsourcing.task.service;
 
+import com.example.outsourcing.comment.service.CommentService;
 import com.example.outsourcing.common.entity.AuthUser;
+import com.example.outsourcing.common.exception.AccessDeniedException;
+import com.example.outsourcing.manager.service.ManagerService;
 import com.example.outsourcing.task.dto.CreateTaskRequestDto;
 import com.example.outsourcing.task.dto.TaskListResponseDto;
 import com.example.outsourcing.task.dto.TaskResponseDto;
@@ -31,6 +34,9 @@ public class TaskServiceImpl {
 
     private final UserRepository userRepository;
 
+    private final CommentService commentService;
+    private final ManagerService managerService;
+
     @Transactional
     public TaskResponseDto createTask(CreateTaskRequestDto RequestDto, AuthUser authUser) {
         Task.Status status = RequestDto.getStatus() != null ? RequestDto.getStatus() : Task.Status.TODO;
@@ -47,6 +53,7 @@ public class TaskServiceImpl {
                 .startDate(status == Task.Status.IN_PROGRESS ? LocalDateTime.now() : null)
                 .user(user)
                 .build();
+        task.addManagers(user);
         Task saved = taskRepository.save(task);
 
         TaskResponseDto responseDto = TaskResponseDto.builder()
@@ -172,6 +179,14 @@ public class TaskServiceImpl {
                 .createdAt(deletedTask.getCreatedAt())
                 .updatedAt(deletedTask.getUpdatedAt())
                 .build();
+    }
 
+    public List<Long> findTaskIdsByUserId(Long userId) {
+        return taskRepository.findTaskIdsByUserId(userId);
+    }
+
+    public void softDeleteTasks(List<Long> taskIds) {
+        managerService.softDeleteManagers(taskIds);
+        commentService.softDeleteComments(taskIds);
     }
 }
