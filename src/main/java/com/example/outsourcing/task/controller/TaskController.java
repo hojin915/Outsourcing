@@ -55,6 +55,15 @@ public class TaskController {
             @AuthenticationPrincipal AuthUser authUser
             ) {
         taskService.updateTaskStatus(id, dto.getStatus(), authUser.getId());
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok("수정되었습니다.");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteTask(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        taskService.deleteTask(id, authUser.getId());
+        return ResponseEntity.ok("태스크가 삭제 되었습니다.");
     }
 }
