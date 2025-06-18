@@ -65,17 +65,6 @@ public class GlobalExceptionHandler {
                         fieldError -> Optional.ofNullable(fieldError.getDefaultMessage()).orElse(""),
                         (existing, replacement) -> replacement));
 
-//        List<Map<String, String>> errors = ex.getBindingResult()
-//                .getFieldErrors()
-//                .stream()
-//                .map(error -> {
-//                    Map<String, String> errorDetail = new HashMap<>();
-//                    errorDetail.put(error.getField(), error.getDefaultMessage());
-//                    return errorDetail;
-//                })
-//                .toList();
-//        String errorMessage = new ObjectMapper().writeValueAsString(errors);
-
         return getErrorResponse(status, errorMap);
     }
 

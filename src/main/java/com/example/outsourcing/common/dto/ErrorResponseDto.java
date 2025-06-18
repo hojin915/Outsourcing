@@ -12,5 +12,4 @@ public class ErrorResponseDto extends ResponseDto<Void> {
         this.success = false;
         this.errorCode = errorCode;
     }
-
 }
