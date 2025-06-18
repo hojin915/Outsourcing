@@ -8,15 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +85,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             @Param("inProgressStatus") Task.Status inProgressStatus
     );
 
+    @Query("""
+        SELECT t FROM Task t WHERE t.status = :status
+        ORDER BY 
+        CASE t.priority 
+        WHEN 'HIGH' THEN 1 
+        WHEN 'MEDIUM' THEN 2 
+        WHEN 'LOW' THEN 3 END ASC""")
+    List<Task> findTaskSortedByPriority(@Param("status") Task.Status status);
     /**
      *
      * @param status

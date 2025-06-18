@@ -49,9 +49,37 @@ public class AuthIntegrationTest {
     private static final String NAME = "auth test user ";
     private static final UserRole USER_ROLE = UserRole.USER;
 
-    @DisplayName("유효하지 않은 토큰이 들어오면 예외가 발생한다")
+    @DisplayName("만료된 토큰이 들어오면 예외가 발생한다")
     @Test
     void exception_test_EXPIRED_JWT_TOKEN() throws Exception {
+        // 1. given
+        // 임의의 데이터로 만든 만료 토큰
+        String token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiItMSIsInVzZXJuYW1lIjoi66eM66OM65CcIO2GoO2BsOqwkiIsInVzZXJSb2xlIjoiVVNFUiIsImV4cCI6MTc1MDIyNTk1OCwiaWF0IjoxNzUwMjI5NTU4fQ.z5_-K3LAUN6ZEwnHS6fFMAiCnoTJH0wjZEe88XfixSo";
+
+        // 2. when
+        ResultActions getProfile = mockMvc.perform(get("/api/users/me")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token));
+
+        String getProfileAsString = getProfile.andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String data = objectMapper.readTree(getProfileAsString).toString();
+
+        ErrorResponseDto response = objectMapper.readValue(data, ErrorResponseDto.class);
+
+        // 3. then
+        getProfile.andExpect(status().isUnauthorized());
+
+        assertFalse(response.isSuccess());
+        assertNull(response.getData());
+        assertEquals(ExceptionCode.EXPIRED_JWT_TOKEN.getMessage(), response.getMessage());
+        assertEquals(ExceptionCode.EXPIRED_JWT_TOKEN.toString(), response.getErrorCode());
+    }
+
+    @DisplayName("유효하지 않은 토큰이 들어오면 예외가 발생한다")
+    @Test
+    void exception_test_INVALID_JWT_SIGNATURE() throws Exception {
         // 1. given
         String token = "asease.asease.asease";
 
@@ -75,7 +103,6 @@ public class AuthIntegrationTest {
         assertEquals(ExceptionCode.INVALID_JWT_SIGNATURE.getMessage(), response.getMessage());
         assertEquals(ExceptionCode.INVALID_JWT_SIGNATURE.toString(), response.getErrorCode());
     }
-
 
     @DisplayName("토큰이 없으면 예외가 발생한다")
     @Test
