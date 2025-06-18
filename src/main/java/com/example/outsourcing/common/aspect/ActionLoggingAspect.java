@@ -38,41 +38,25 @@ public class ActionLoggingAspect {
 
         //작업 시간
         LocalDateTime requestTime = LocalDateTime.now();
-        // 현재 요청의 IP 주소를 가져오는 메서드 : ex) X-Forwarded-For:unknown
+        // 현재 요청의 IP 주소를 가져오는 메서드
         String clientIpAddress = getClientIpAddress();
         // HTTP 메서드 (GET, POST 등)
         String requestMethod = getRequestMethod();
-        // RequestUrl
+        // RequestUrl 메서드
         String requestUrl = getRequestUrl();
         // 현재 로그인된 사용자 ID 추출
         String loggedInUserId = getCurrentLoggedInUserId();
 
-//        Long targetId = getTargetIdFromToken();
+//        Long targetId = extractTargetId(joinPoint.getArgs());
 
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
 
         String activityType = null;
-        if (methodName.equals("signup")) {
-            activityType = "USER_SIGNUP";
-        } else if (methodName.equals("login")) {
-            activityType = "USER_LOGIN";
-        } else if (methodName.equals("profile")) {
-            activityType = "USER_PROFILE";
-        } else if (methodName.equals("delete")) {
-            activityType = "USER_DELETE";
-        } else if (methodName.equals("delete")) {
-            activityType = "USER_DELETE";
-        } else if (methodName.equals("commentCreated")) {
-            activityType = "COMMENT_CREATED";
-        } else if (methodName.equals("commentFindAll")) {
-            activityType = "COMMENT_FIND_ALL";
-        } else if (methodName.equals("commentFindById")) {
-            activityType = "COMMENT_FIND_BY_ID";
-        } else if (methodName.equals("commentUpdate")) {
-            activityType = "COMMENT_UPDATED";
-        } else if (methodName.equals("commentdelete")) {
-            activityType = "COMMENT_DELETED";
+
+        // activityType
+        if (methodName != null) {
+            activityType = methodName.toUpperCase();
         }
 
         Object result = null;
