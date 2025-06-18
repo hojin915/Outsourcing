@@ -141,7 +141,7 @@ public class AuthIntegrationTest {
         UserDeleteRequestDto requestDto = new UserDeleteRequestDto(PASSWORD);
 
         // 2. when
-        ResultActions withdraw = mockMvc.perform(delete("/api/users")
+        ResultActions withdraw = mockMvc.perform(post("/api/auth/withdraw")
                 .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)));
@@ -157,7 +157,7 @@ public class AuthIntegrationTest {
     private UserSignupResponseDto doSignup() throws Exception {
         UserSignupRequestDto requestDto = new UserSignupRequestDto(USERNAME, EMAIL, PASSWORD, NAME);
 
-        String signupAsString = mockMvc.perform(post("/api/users/register")
+        String signupAsString = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andReturn()
@@ -175,7 +175,7 @@ public class AuthIntegrationTest {
         UserLoginRequestDto requestDto = new UserLoginRequestDto(username, PASSWORD);
 
         // xxx : 프론트 연결 api로 변경시 같이 변경 필요
-        String signupAsString = mockMvc.perform(post("/api/users/login")
+        String signupAsString = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andReturn()
