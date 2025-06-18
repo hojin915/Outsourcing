@@ -67,4 +67,9 @@ public class Task extends SoftDeleteEntity {
                     (this == Status.IN_PROGRESS && next == Status.DONE);
         }
     }
+
+    // 테스트코드용 생성자
+    public Task(Long id) {
+        this.id = id;
+    }
 }
