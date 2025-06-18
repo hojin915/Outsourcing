@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api")
 public class CommentController {
 
     // CommentService 의존성 주입(DI)
@@ -26,7 +26,7 @@ public class CommentController {
     }
 
     // 댓글 생성 컨트롤러
-    @PostMapping("/{task_id}")
+    @PostMapping("/tasks/{task_id}/comments")
     public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated (@AuthenticationPrincipal AuthUser user,
                                                                        @PathVariable("task_id") Long taskId,
                                                                        @RequestBody CommentRequestDto requestDto) {
@@ -45,7 +45,7 @@ public class CommentController {
     }
 
     // 태스크 댓글 전체 조회 컨트롤러
-    @GetMapping("/{task_id}")
+    @GetMapping("/tasks/{task_id}/comments")
     public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentFindAll (@PathVariable("task_id") Long taskId) {
 
         // 서비스 레이어의 commentFindAll 메서드 호출
@@ -61,7 +61,7 @@ public class CommentController {
     }
 
     // 댓글 단건 조회 컨트롤러
-    @GetMapping("/comment/{comment_id}")
+    @GetMapping("/comments/{comment_id}")
     public ResponseEntity<ResponseDto<CommentDataDto>> commentFindById (@PathVariable("comment_id") Long commentId) {
 
         CommentDataDto commentFindById = commentService.commentFindById(commentId);
@@ -75,7 +75,7 @@ public class CommentController {
     }
 
     // 댓글 수정 컨트롤러
-    @PatchMapping("/{comment_id}")
+    @PatchMapping("/comments/{comment_id}")
     public ResponseEntity<ResponseDto<CommentDataDto>> commentUpdate (@AuthenticationPrincipal AuthUser user,
                                                                       @PathVariable("comment_id") Long commentId,
                                                                       @RequestBody CommentRequestDto requestDto) {
@@ -91,7 +91,7 @@ public class CommentController {
     }
 
     // 댓글 삭제 컨트롤러
-    @DeleteMapping("/{comment_id}")
+    @DeleteMapping("/comments/{comment_id}")
     public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete (@AuthenticationPrincipal AuthUser user,
                                                                         @PathVariable("comment_id") Long commentId) {
 
@@ -106,7 +106,7 @@ public class CommentController {
     }
 
     // 태스크 댓글 검색 기능
-    @GetMapping("/{task_id}/search")
+    @GetMapping("/tasks/{task_id}/comments/search")
     public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentFindTaskSearch (@PathVariable("task_id") Long taskId,
                                                                                     @RequestBody CommentSearchRequestDto requestDto) {
 
@@ -121,7 +121,7 @@ public class CommentController {
     }
 
     // 전체 댓글 검색 기능
-    @GetMapping("/search")
+    @GetMapping("/comments/search")
     public ResponseEntity<ResponseDto<List<CommentDataDto>>> commentfindAllSearch (@RequestBody CommentSearchRequestDto requestDto) {
 
         List<CommentDataDto> commentSearch = commentService.commentfindAllSearch(requestDto.getSearch());
