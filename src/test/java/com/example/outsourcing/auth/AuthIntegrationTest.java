@@ -3,10 +3,13 @@ package com.example.outsourcing.auth;
 import com.example.outsourcing.common.dto.ErrorResponseDto;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
+import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
 import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
+import com.example.outsourcing.user.entity.User;
+import com.example.outsourcing.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,10 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -35,6 +39,8 @@ public class AuthIntegrationTest {
     MockMvc mockMvc;
     @Autowired
     ObjectMapper objectMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String USERNAME = "authTestUser";
@@ -96,7 +102,6 @@ public class AuthIntegrationTest {
         assertEquals(ExceptionCode.UNAUTHORIZED_API_REQUEST.toString(), response.getErrorCode());
     }
 
-
     @DisplayName("토큰발급 확인 및 프로필 조회 성공")
     @Test
     void checkTokenAndGetProfile() throws Exception {
@@ -125,6 +130,28 @@ public class AuthIntegrationTest {
         assertEquals(NAME, response.getName());
         assertEquals(EMAIL, response.getEmail());
         assertEquals(USER_ROLE, response.getUserRole());
+    }
+
+    @DisplayName("토큰발급 확인 및 회원탈퇴 성공")
+    @Test
+    void checkTokenAndWithdraw() throws Exception {
+        // 1. given
+        UserSignupResponseDto signupResult = doSignup();
+        String token = getTokenByLogin(signupResult.getUsername());
+        UserDeleteRequestDto requestDto = new UserDeleteRequestDto(PASSWORD);
+
+        // 2. when
+        ResultActions withdraw = mockMvc.perform(delete("/api/users")
+                .header(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)));
+
+        // 3. then
+        Optional<User> user = userRepository.findByEmail(EMAIL);
+
+        withdraw.andExpect(status().isOk());
+        assertTrue(user.isPresent());
+        assertTrue(user.get().isDeleted());
     }
 
     private UserSignupResponseDto doSignup() throws Exception {
