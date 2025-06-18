@@ -9,14 +9,12 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import com.example.outsourcing.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.example.outsourcing.comment.dto.CommentDeleteDto.toDto;
 import static com.example.outsourcing.common.exception.exceptions.ExceptionCode.*;
 
 
