@@ -3,6 +3,7 @@ package com.example.outsourcing.user.service;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
+import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
@@ -11,6 +12,7 @@ import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
+import com.example.outsourcing.user.dto.response.UserDeleteResponseDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
 import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
@@ -77,8 +79,7 @@ public class UserService {
     }
 
     public UserProfileResponseDto getProfile(String username) {
-        User totalUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+        User totalUser = findByUsernameOrElseThrow(username);
 
         UserProfileResponseDto responseDto = new UserProfileResponseDto(totalUser);
 
@@ -89,7 +90,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(String username, UserDeleteRequestDto request) {
+    public UserDeleteResponseDto delete(String username, UserDeleteRequestDto request) {
         // 유저가 없을 시 예외처리
         User user = findByUsernameOrElseThrow(username);
 
@@ -100,10 +101,12 @@ public class UserService {
         user.softDelete();
         taskRepository.softDeleteTasksByUserId(user.getId());
         commentRepository.softDeleteCommentsByUserId(user.getId());
+
+        return new UserDeleteResponseDto(user.getId());
     }
 
     // 공통 예외 처리
-    private void commonUserCheck(User user, String password) {
+    public void commonUserCheck(User user, String password) {
         // 삭제된 유저시 예외처리
         if(user.isDeleted()) {
             throw new CustomException(ExceptionCode.DELETED_USER);
@@ -115,6 +118,7 @@ public class UserService {
         }
     }
 
+    // username 으로 유저 못찾을 경우 예외처리
     // 예외처리 Repository -> Service 이동
     // 기존 사용으로 인해 Repository 내부 메서드 유지
     public User findByUsernameOrElseThrow(String username) {
