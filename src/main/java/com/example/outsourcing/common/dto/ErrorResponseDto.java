@@ -10,13 +10,13 @@ public class ErrorResponseDto extends ResponseDto<Void> {
 
     private String errorCode;
 
-    public ErrorResponseDto(Object message, String errorCode) {
+    public ErrorResponseDto(String message, String errorCode) {
         super(message, null);
         this.success = false;
         this.errorCode = errorCode;
     }
 
-    public ErrorResponseDto(Object message, ExceptionCode errorCode) {
+    public ErrorResponseDto(String message, ExceptionCode errorCode) {
         super(message, null);
         this.success = false;
         this.errorCode = errorCode.toString();
