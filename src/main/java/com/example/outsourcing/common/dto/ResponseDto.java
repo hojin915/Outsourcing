@@ -2,18 +2,20 @@ package com.example.outsourcing.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
+@NoArgsConstructor
 @JsonPropertyOrder({"success", "message", "data", "errorCode", "timestamp"})
 public class ResponseDto<T> {
 
     boolean success;
-    private final Object message;
-    private final T data;
-    private final String timestamp;
+    private Object message;
+    private T data;
+    private String timestamp;
 
     public ResponseDto(Object message, T data) {
         this.success = true;
