@@ -9,12 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -51,6 +55,10 @@ public class ActionLoggingAspect {
 
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
+
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        Object[] args = joinPoint.getArgs();
 
         String activityType = null;
         if (methodName.equals("signup")) {
@@ -91,6 +99,18 @@ public class ActionLoggingAspect {
                     userIdToLog = Long.valueOf(loggedInUserId);
                 } catch (NumberFormatException e) {
                     log.error("Error converting loggedInUserId to Long: " + loggedInUserId, e);
+                }
+            }
+
+
+
+            for(int i = 0; i < method.getParameters().length; i++){
+                Parameter parameter = method.getParameters()[i];
+                log.info(parameter.toString());
+                if(parameter.isAnnotationPresent(PathVariable.class)){
+                    String paramName = parameter.getName();
+                    Object value = args[i];
+                    log.info("param: {} | value: {}", paramName, value);
                 }
             }
 
