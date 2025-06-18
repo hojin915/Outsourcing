@@ -19,8 +19,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertNotNull;
+import static org.springframework.test.util.AssertionErrors.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
@@ -46,7 +45,7 @@ public class CommentServiceTest {
         String testText = "테스트 댓글입니다.";
 
         User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
-        Task task = new Task();
+        Task task = new Task(taskId);
         Comment comment = new Comment(task, user, testText);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -61,5 +60,29 @@ public class CommentServiceTest {
         assertEquals("댓글 불일치", testText, commentDataDto.getComment());
     }
 
+    @Test
+    void 태스크별_댓글_전체_조회_서비스_단위_테스트() {
+
+        // given
+        Long taskId = 1L;
+        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
+        Task task = new Task(taskId);
+
+        Comment comment1 = new Comment(task, user, "댓글1");
+        Comment comment2 = new Comment(task, user, "댓글2");
+
+        List<Comment> commentList = List.of(comment1, comment2);
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        when(commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(taskId))
+                .thenReturn(commentList);
+
+        // when
+        List<CommentDataDto> commentFindAll = commentService.commentFindAll(taskId);
+
+        // then
+        assertTrue("리스트에 데이터가 없습니다.", commentFindAll.size() > 0);
+
+    }
 
 }
