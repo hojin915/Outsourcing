@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.outsourcing.comment.dto.CommentDeleteDto.toDto;
 import static com.example.outsourcing.common.exception.exceptions.ExceptionCode.*;
 
 
@@ -54,18 +55,11 @@ public class CommentService {
         Comment newComment = new Comment(task, user, comment);
 
         // DB에 생성된 댓글 저장
-        commentRepository.save(newComment);
+        Comment saveComment = commentRepository.save(newComment);
 
         // 반환 객체 생성 후 반환
-        return new CommentDataDto(
-                newComment.getCommentId(),
-                newComment.getTask().getId(),
-                newComment.getUser().getId(),
-                newComment.getUser().getUsername(),
-                newComment.getComment(),
-                newComment.getCreatedAt(),
-                newComment.getUpdatedAt()
-        );
+        // Comment객체를 CommentDataDto객체로 변환하며 targetId 삽입
+        return CommentDataDto.toDto(saveComment, saveComment.getCommentId());
     }
 
     // 태스크 댓글 전체 조회 비지니스 로직
@@ -78,7 +72,7 @@ public class CommentService {
 
         return commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId())
                 .stream()
-                .map(CommentDataDto::toDto) // Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
+                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))// Comment클래스에 정의한 toDto 메서드를 사용해 Comment객체를 CommentDataDto타입으로 변환
                 .toList();
     }
 
@@ -93,7 +87,7 @@ public class CommentService {
             throw new CustomException(COMMENT_NOT_FOUND);
         }
 
-        return CommentDataDto.toDto(findByIdComment);
+        return CommentDataDto.toDto(findByIdComment, findByIdComment.getCommentId());
     }
 
     // 댓글 수정 비지니스 로직
@@ -123,7 +117,7 @@ public class CommentService {
 
         commentUpdate.setComment(comment);
 
-        return CommentDataDto.toDto(commentUpdate);
+        return CommentDataDto.toDto(commentUpdate, commentUpdate.getCommentId());
     }
 
     // 댓글 삭제 비지니스 로직
@@ -145,7 +139,7 @@ public class CommentService {
         comment.setDeleted(true);
         comment.setDeletedAt(LocalDateTime.now());
 
-        return CommentDeleteDto.toDto(comment);
+        return CommentDeleteDto.toDto(comment, comment.getCommentId());
     }
 
     // 태스크별 댓글 검색 비지니스 로직
@@ -162,7 +156,7 @@ public class CommentService {
 
         return commentRepository.findByTaskIdAndSearch(taskId, search)
                 .stream()
-                .map(CommentDataDto::toDto)
+                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
                 .toList();
     }
 
@@ -177,7 +171,7 @@ public class CommentService {
 
         return commentRepository.findAllSearch(search)
                 .stream()
-                .map(CommentDataDto::toDto)
+                .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
                 .toList();
     }
 }
