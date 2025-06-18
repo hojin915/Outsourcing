@@ -1,5 +1,6 @@
 package com.example.outsourcing.manager.entity;
 
+import com.example.outsourcing.common.entity.SoftDeleteEntity;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.user.entity.User;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
         @UniqueConstraint(name = "task_user_unique", columnNames = {"task_id", "user_id"})
     }
 )
-public class Manager {
+public class Manager extends SoftDeleteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

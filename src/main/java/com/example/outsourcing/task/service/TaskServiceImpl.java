@@ -2,6 +2,7 @@ package com.example.outsourcing.task.service;
 
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.AccessDeniedException;
+import com.example.outsourcing.manager.service.ManagerService;
 import com.example.outsourcing.task.dto.CreateTaskRequestDto;
 import com.example.outsourcing.task.dto.TaskResponseDto;
 import com.example.outsourcing.task.entity.Task;
@@ -45,6 +46,7 @@ public class TaskServiceImpl {
                 .startDate(status == Task.Status.IN_PROGRESS ? LocalDateTime.now() : null)
                 .user(user)
                 .build();
+        task.addManagers(user);
         Task saved = taskRepository.save(task);
 
         TaskResponseDto responseDto = TaskResponseDto.builder()
@@ -141,5 +143,7 @@ public class TaskServiceImpl {
         taskRepository.save(task);
     }
 
-
+    public List<Long> findTaskIdsByUserId(Long userId) {
+        return taskRepository.findTaskIdsByUserId(userId);
+    }
 }

@@ -52,6 +52,7 @@ public class Task extends SoftDeleteEntity {
     @OneToMany(mappedBy = "task")
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "task", cascade = CascadeType.PERSIST)
     private List<Manager> managers = new ArrayList<>();
 
@@ -71,5 +72,9 @@ public class Task extends SoftDeleteEntity {
     // 테스트코드용 생성자
     public Task(Long id) {
         this.id = id;
+    }
+
+    public void addManagers(User user) {
+        this.managers.add(new Manager(this, user));
     }
 }

@@ -97,5 +97,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      */
     List<Task> findByStatusOrderByPriorityDesc(Task.Status status);
 
-
+    @Query("SELECT t.id from Task t WHERE t.user.id = :userId and t.isDeleted = false")
+    List<Long> findTaskIdsByUserId(Long userId);
 }
