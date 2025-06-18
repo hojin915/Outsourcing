@@ -1,15 +1,13 @@
 package com.example.outsourcing.dashboard.controller;
 
 import com.example.outsourcing.common.dto.ResponseDto;
-import com.example.outsourcing.dashboard.dto.TaskByPriority;
+import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
 import com.example.outsourcing.dashboard.service.DashBoardService;
-import com.example.outsourcing.task.entity.Task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,8 +68,8 @@ public class DashBoardController {
      * @return TODO 상태의 태스크 목록을 우선순위에따라 정렬하여 반환
      */
     @GetMapping("/tasks/sorted-priority/todo")
-    public ResponseEntity<ResponseDto<List<TaskByPriority>>> getTodoSortedByPriority () {
-        List<TaskByPriority> todoTasks = dashBoardService.todoSortedByPriority();
+    public ResponseEntity<ResponseDto<List<TaskByPriorityDto>>> getTodoSortedByPriority () {
+        List<TaskByPriorityDto> todoTasks = dashBoardService.todoSortedByPriority();
         return ResponseEntity.ok().body(new ResponseDto<>("TODO 태스크 (우선순위 정렬)",todoTasks));
     }
 
@@ -80,8 +78,8 @@ public class DashBoardController {
      * @return IN-PROGRESS 상태의 태스크 목록을 우선순위에 따라 정렬하여 반환
      */
     @GetMapping("/tasks/sorted-priority/in-progress")
-    public ResponseEntity<ResponseDto<List<TaskByPriority>>> getInProgressSortedByPriority () {
-        List<TaskByPriority> inProgressTasks = dashBoardService.inProgressSortedByPriority();
+    public ResponseEntity<ResponseDto<List<TaskByPriorityDto>>> getInProgressSortedByPriority () {
+        List<TaskByPriorityDto> inProgressTasks = dashBoardService.inProgressSortedByPriority();
         return ResponseEntity.ok().body(new ResponseDto<>("IN_PROGRESS 테스크 (우선순위 정렬)", inProgressTasks));
     }
 

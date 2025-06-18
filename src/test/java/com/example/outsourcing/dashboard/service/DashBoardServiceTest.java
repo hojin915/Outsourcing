@@ -1,7 +1,5 @@
 package com.example.outsourcing.dashboard.service;
 
-import com.example.outsourcing.common.enums.UserRole;
-import com.example.outsourcing.dashboard.dto.TaskByPriority;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
@@ -13,16 +11,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.outsourcing.task.entity.Task.Priority.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

@@ -1,11 +1,10 @@
 package com.example.outsourcing.dashboard.dto;
 
 import com.example.outsourcing.task.entity.Task;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class TaskByPriority {
+public class TaskByPriorityDto {
 
     private Long id;
     private String title;
@@ -14,7 +13,7 @@ public class TaskByPriority {
     private Task.Priority priority;
     private UserDtoForTask user;
 
-    public TaskByPriority(Task task) {
+    public TaskByPriorityDto(Task task) {
         this.id = task.getId();
         this.title = task.getTitle();
         this.content = task.getContent();
