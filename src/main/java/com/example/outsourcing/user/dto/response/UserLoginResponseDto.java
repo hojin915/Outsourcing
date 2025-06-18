@@ -14,4 +14,9 @@ public class UserLoginResponseDto implements TargetIdentifiable {
     public UserLoginResponseDto(String token) {
         this.token = token;
     }
+
+    @Override
+    public Long getTargetId() {
+        return this.targetId;
+    }
 }

@@ -31,4 +31,9 @@ public class UserSignupResponseDto implements TargetIdentifiable {
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
     }
+
+    @Override
+    public Long getTargetId() {
+        return this.id;
+    }
 }
