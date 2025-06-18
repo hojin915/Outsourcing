@@ -1,16 +1,21 @@
-package com.example.outsourcing;
+package com.example.outsourcing.user.service;
 
+import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
+import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
+import com.example.outsourcing.user.dto.response.UserDeleteResponseDto;
 import com.example.outsourcing.user.dto.response.UserLoginResponseDto;
+import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
 import com.example.outsourcing.user.dto.response.UserSignupResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import com.example.outsourcing.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,12 +47,19 @@ public class UserServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private TaskRepository taskRepository;
+
+    @Mock
+    private CommentRepository commentRepository;
+
     private String username;
     private String email;
     private String password;
     private String name;
     private User user;
 
+    // 유저 세팅
     @BeforeEach
     void setUp() {
         username = "TestUserName";
@@ -96,7 +107,7 @@ public class UserServiceTest {
         // when & then
         CustomException exception = assertThrows(CustomException.class,
                 () -> userService.signup(request));
-        assertEquals("이미 존재하는 이메일입니다", exception.getMessage());
+        assertEquals(ExceptionCode.ALREADY_EXISTS_EMAIL, exception.getExceptionCode());
     }
 
     @Test
@@ -109,16 +120,16 @@ public class UserServiceTest {
         // when & then
         CustomException exception = assertThrows(CustomException.class,
                 () -> userService.signup(request));
-        assertEquals("이미 존재하는 아이디입니다", exception.getMessage());
+        assertEquals(ExceptionCode.ALREADY_EXISTS_USERNAME, exception.getExceptionCode());
     }
 
     @Test
     public void auth_로그인_정상처리() {
         // given
         UserLoginRequestDto request = new UserLoginRequestDto(username, password);
-        String testToken = UUID.randomUUID().toString();
-        when(userRepository.findByUsernameOrElseThrow(anyString())).thenReturn(user);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+        String testToken = UUID.randomUUID().toString();
         when(jwtUtil.createToken(anyLong(), anyString(), any(UserRole.class))).thenReturn(testToken);
 
         // when
@@ -130,14 +141,70 @@ public class UserServiceTest {
     }
 
     @Test
-    public void auth_로그인_아이디_없을시_예외처리() {
+    public void auth_아이디_없을시_예외처리() {
         // given
-        UserLoginRequestDto request = new UserLoginRequestDto(username, password);
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
         // when & then
         CustomException exception = assertThrows(CustomException.class,
-                () -> userService.login(request));
-        assertEquals("유저를 찾을 수 없습니다", exception.getMessage());
+                () -> userService.findByUsernameOrElseThrow(username));
+        assertEquals(ExceptionCode.USER_NOT_FOUND, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_삭제된_유저시_예외처리() {
+        // given
+        ReflectionTestUtils.setField(user, "isDeleted", true);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.commonUserCheck(user, password));
+        assertEquals(ExceptionCode.DELETED_USER, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_비밀번호_틑릴시_예외처리() {
+        // given
+        ReflectionTestUtils.setField(user, "isDeleted", false);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        // when & then
+        CustomException exception = assertThrows(CustomException.class,
+                () -> userService.commonUserCheck(user, password));
+        assertEquals(ExceptionCode.WRONG_PASSWORD, exception.getExceptionCode());
+    }
+
+    @Test
+    public void auth_프로필_조회_정상작동() {
+        // given
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+
+        // when
+        UserProfileResponseDto response = userService.getProfile(username);
+
+        // then
+        assertEquals(user.getId(), response.getId());
+        assertEquals(username, response.getUsername());
+        assertEquals(email, response.getEmail());
+        assertEquals(name, response.getName());
+        assertEquals(UserRole.USER, response.getUserRole());
+    }
+
+    @Test
+    public void auth_회원탈퇴_정상작동() {
+        // given
+        UserDeleteRequestDto request = new UserDeleteRequestDto(password);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        // when
+        UserDeleteResponseDto response = userService.delete(username, request);
+
+        // then
+        assertEquals(user.getId(), response.getTargetId());
+        assertTrue(user.isDeleted());
+
+        verify(taskRepository).softDeleteTasksByUserId(anyLong());
+        verify(commentRepository).softDeleteCommentsByUserId(anyLong());
     }
 }
