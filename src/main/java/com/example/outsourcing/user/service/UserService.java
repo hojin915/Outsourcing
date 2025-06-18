@@ -48,8 +48,12 @@ public class UserService {
         User user = new User(username, email, password, name, UserRole.USER);
 
         User savedUser = userRepository.save(user);
+        UserSignupResponseDto responseDto = new UserSignupResponseDto(savedUser);
 
-        return new UserSignupResponseDto(savedUser);
+        // targetId 삽입
+        responseDto.setTargetId(savedUser.getId());
+
+        return responseDto;
     }
 
     public UserLoginResponseDto login(UserLoginRequestDto request) {
@@ -57,52 +61,64 @@ public class UserService {
         String password = request.getPassword();
 
         // 아이디 없을 경우 예외처리
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+        User user = findByUsernameOrElseThrow(username);
 
-        // 탈퇴한 유저인 경우 예외처리
-        if(user.isDeleted()) {
-            throw new CustomException(ExceptionCode.DELETED_USER);
-        }
-
-        // 비밀번호 틀릴시 예외처리
-        if(!passwordEncoder.matches(password, user.getPassword())){
-            throw new CustomException(ExceptionCode.WRONG_PASSWORD);
-        }
+        commonUserCheck(user, password);
 
         // 토큰 생성해서 반환
         String token = jwtUtil.createToken(user.getId(), user.getUsername(),user.getUserRole());
 
-        return new UserLoginResponseDto(token);
+        UserLoginResponseDto responseDto = new UserLoginResponseDto(token);
+
+        // targetId 삽입
+        responseDto.setTargetId(user.getId());
+
+        return responseDto;
     }
 
     public UserProfileResponseDto getProfile(String username) {
         User totalUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
-        return new UserProfileResponseDto(totalUser);
+
+        UserProfileResponseDto responseDto = new UserProfileResponseDto(totalUser);
+
+        // targetId 삽입
+        responseDto.setTargetId(totalUser.getId());
+
+        return responseDto;
     }
 
     @Transactional
     public void delete(String username, UserDeleteRequestDto request) {
         // 유저가 없을 시 예외처리
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+        User user = findByUsernameOrElseThrow(username);
 
         String password = request.getPassword();
 
-        // 비밀번호 틀릴 시 예외처리
-        if(!passwordEncoder.matches(password, user.getPassword())){
-            throw new CustomException(ExceptionCode.WRONG_PASSWORD);
-        }
+        commonUserCheck(user, password);
 
+        user.softDelete();
+        taskRepository.softDeleteTasksByUserId(user.getId());
+        commentRepository.softDeleteCommentsByUserId(user.getId());
+    }
+
+    // 공통 예외 처리
+    private void commonUserCheck(User user, String password) {
         // 삭제된 유저시 예외처리
         if(user.isDeleted()) {
             throw new CustomException(ExceptionCode.DELETED_USER);
         }
 
-        user.softDelete();
-        taskRepository.softDeleteTasksByUserId(user.getId());
-        commentRepository.softDeleteCommentsByUserId(user.getId());
+        // 비밀번호 틀릴 시 예외처리
+        if(!passwordEncoder.matches(password, user.getPassword())){
+            throw new CustomException(ExceptionCode.WRONG_PASSWORD);
+        }
+    }
 
+    // 예외처리 Repository -> Service 이동
+    // 기존 사용으로 인해 Repository 내부 메서드 유지
+    public User findByUsernameOrElseThrow(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
     }
 }

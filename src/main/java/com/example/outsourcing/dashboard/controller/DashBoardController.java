@@ -1,0 +1,87 @@
+package com.example.outsourcing.dashboard.controller;
+
+import com.example.outsourcing.common.dto.ResponseDto;
+import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
+import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
+import com.example.outsourcing.dashboard.dto.TotalCountsDto;
+import com.example.outsourcing.dashboard.service.DashBoardService;
+import com.example.outsourcing.task.entity.Task;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("api/dashboards")
+public class DashBoardController {
+
+    private final DashBoardService dashBoardService;
+
+    /**
+     *
+     * @return 전체 태스크중 삭제되지 않은 태스크의 개수 조회
+     */
+    @GetMapping("/tasks/total-count")
+    public ResponseEntity<ResponseDto<TotalCountsDto>> getTotalTaskCount() {
+        TotalCountsDto resultDto = dashBoardService.getTotalCount();
+
+        return ResponseEntity.ok()
+                .body(new ResponseDto<>("전체 태스크 개수 조회", resultDto));
+    }
+
+    /**
+     *
+     * @return TODO, IN_PROGRESS, DONE 상태별 테스크 개수 조회
+     */
+    @GetMapping("/tasks/status-counts")
+    public ResponseEntity<ResponseDto<TaskStatusCountsDto>> getTaskStatusCounts() {
+        TaskStatusCountsDto resultDto = dashBoardService.getTaskStatusCounts();
+        return ResponseEntity.ok().body(new ResponseDto<>("상태별 태스크 개수 조회",resultDto));
+    }
+
+    /**
+     * 전체 태스크 중 완료된 태스크의 비율을 조회
+     * @return 완료율(소수점 둘째 자리까지 포매팅)
+     */
+    @GetMapping("/tasks/completion-rate")
+    public ResponseEntity<ResponseDto<TaskDoneRatioDto>> getDoneRatio() {
+        TaskDoneRatioDto resultDto = dashBoardService.getDoneRatio();
+        return ResponseEntity.ok().body(new ResponseDto<>("태스크 완료율 조회",resultDto));
+    }
+
+    /**
+     * 마감일을지난 TODO 또는 IN_PROGRESS 상태인 태스크 개수 조회
+     * @return 마감기한이 지난 태스크 개수
+     */
+    @GetMapping("/tasks/overdue-count")
+    public ResponseEntity<ResponseDto<Long>> getOverdueCount() {
+        Long overdueCount = dashBoardService.getOverdueTaskCount();
+        return ResponseEntity.ok().body(new ResponseDto<>("기한 초과된 태스크 개수 조회",overdueCount));
+    }
+
+
+    /**
+     *
+     * @return TODO 상태의 태스크 목록을 우선순위에따라 정렬하여 반환
+     */
+    @GetMapping("/tasks/sorted-priority/todo")
+    public ResponseEntity<ResponseDto<List<Task>>> getTodoSortedByPriority () {
+        List<Task> todoTasks = dashBoardService.getTodoSortedByPriority();
+        return ResponseEntity.ok().body(new ResponseDto<>("TODO 태스크 조회(우선순위 정렬)",todoTasks));
+    }
+
+    /**
+     *
+     * @return IN-PROGRESS 상태의 태스크 목록을 우선순위에 따라 정렬하여 반환
+     */
+    @GetMapping("/tasks/sorted-priority/in-progress")
+    public ResponseEntity<ResponseDto<List<Task>>> getInProgressSortedByPriority () {
+        List<Task> inProgressTasks = dashBoardService.getInProgressSortedByPriority();
+        return ResponseEntity.ok().body(new ResponseDto<>("IN_PROGRESS 테스크 조회(우선순위 정렬)", inProgressTasks));
+    }
+
+}

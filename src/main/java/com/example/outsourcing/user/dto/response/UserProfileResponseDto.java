@@ -1,13 +1,16 @@
 package com.example.outsourcing.user.dto.response;
 
+import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.user.entity.User;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
-public class UserProfileResponseDto {
+public class UserProfileResponseDto implements TargetIdentifiable {
     private Long id;
     private String username;
     private String email;
@@ -15,6 +18,9 @@ public class UserProfileResponseDto {
     private UserRole userRole;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Setter
+    private Long targetId;
 
     public UserProfileResponseDto(User user) {
         this.id = user.getId();

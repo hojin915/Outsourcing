@@ -11,4 +11,12 @@ public class ChangeStatusRequestDto {
 
     @NotNull(message = "상태는 필수입니다.")
     private Task.Status status;
+
+    public Task.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Task.Status status) {
+        this.status = status;
+    }
 }

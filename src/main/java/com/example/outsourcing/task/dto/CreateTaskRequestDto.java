@@ -24,4 +24,6 @@ public class CreateTaskRequestDto {
     @NotNull(message = "마감일은 필수입니다.")
     @Future(message = "마감일은 현재보다 미래여야 합니다.")
     private LocalDateTime dueDate;
+
+    private Task.Status status;
 }

@@ -16,4 +16,5 @@ public class AuthUser implements UserDetails {
     private final String password;
     private final List<SimpleGrantedAuthority> authorities;
 
+
 }
