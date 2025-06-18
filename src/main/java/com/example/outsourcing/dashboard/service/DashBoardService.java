@@ -102,7 +102,7 @@ public class DashBoardService {
 
         return todoTasks.stream()
                 .map(TaskByPriorityDto::new)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
     }
     /**IN_PROGRESS 상태의 태스크 목록을 우선순위 기준으로 정렬
      *
