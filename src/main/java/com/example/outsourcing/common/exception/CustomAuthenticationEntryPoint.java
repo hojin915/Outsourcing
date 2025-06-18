@@ -1,13 +1,13 @@
 package com.example.outsourcing.common.exception;
 
 import com.example.outsourcing.common.dto.ErrorResponseDto;
+import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -23,17 +23,14 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ExceptionCode status = ExceptionCode.UNAUTHORIZED_API_REQUEST;
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                "인증되지 않은 URL 요청입니다. : " + authException.getMessage(),
-                status.getReasonPhrase()
-        );
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(status.getMessage(), status);
         String responseBody = objectMapper.writeValueAsString(errorResponseDto);
 
         log.error("UNAUTHORIZED: Not Authenticated Request - Uri : {}", request.getRequestURI());
 
-        response.setStatus(status.value());
+        response.setStatus(status.getHttpStatus().value());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(responseBody);
