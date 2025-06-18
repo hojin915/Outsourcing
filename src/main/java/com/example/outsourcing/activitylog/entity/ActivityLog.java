@@ -40,8 +40,8 @@ public class ActivityLog {
     @Column(nullable = false)
     private String activityType;
 
-//    @Column(nullable = false)
-//    private Long targetId;
+    @Column(nullable = false)
+    private Long targetId;
 
     @Column(nullable = false)
     private Long executionTimeMs;

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
@@ -31,5 +32,10 @@ public class UserSignupResponseDto implements TargetIdentifiable {
         this.userRole = user.getUserRole();
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
+    }
+
+    @Override
+    public Long getTargetId() {
+        return this.id;
     }
 }
