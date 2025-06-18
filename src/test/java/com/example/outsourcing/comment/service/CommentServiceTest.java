@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +57,9 @@ public class CommentServiceTest {
         CommentDataDto commentDataDto = commentService.commentCreated(userId, taskId, testText);
 
         // then
+        assertNotNull("테스트 실패", commentDataDto.getComment());
         assertEquals("댓글 불일치", testText, commentDataDto.getComment());
     }
+
 
 }
