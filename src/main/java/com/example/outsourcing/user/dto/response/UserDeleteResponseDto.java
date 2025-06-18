@@ -10,4 +10,9 @@ public class UserDeleteResponseDto implements TargetIdentifiable {
     public UserDeleteResponseDto(Long targetId) {
         this.targetId = targetId;
     }
+
+    @Override
+    public Long getTargetId() {
+        return this.targetId;
+    }
 }

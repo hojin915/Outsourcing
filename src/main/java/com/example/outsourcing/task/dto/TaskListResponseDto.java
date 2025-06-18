@@ -1,19 +1,19 @@
-package com.example.outsourcing.user.dto.response;
+package com.example.outsourcing.task.dto;
 
 import com.example.outsourcing.common.dto.TargetIdentifiable;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
-public class UserLoginResponseDto implements TargetIdentifiable {
-    private String token;
+@Builder
+public class TaskListResponseDto implements TargetIdentifiable {
+    private List<TaskResponseDto> tasks; // 태스크 목록
 
     @Setter
     private Long targetId;
-
-    public UserLoginResponseDto(String token) {
-        this.token = token;
-    }
 
     @Override
     public Long getTargetId() {

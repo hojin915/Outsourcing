@@ -1,16 +1,19 @@
 package com.example.outsourcing.dashboard.service;
 
+import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
 import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
 import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
 import com.example.outsourcing.dashboard.dto.TotalCountsDto;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +95,86 @@ class DashBoardServiceTest {
         //then
         assertEquals(expectedCount, count);
         verify(taskRepository, times(1)).countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS);
+    }
 
+    @DisplayName("TODO 상태의 태스크를 우선순위기준으로 정렬")
+    @Test
+    void getTodoSortedByPriority() {
+        //given
+        User testUser = new User();
+        ReflectionTestUtils.setField(testUser, "id", 10L);
 
+        Task task1 = new Task();
+        ReflectionTestUtils.setField(task1, "id", 1L);
+        ReflectionTestUtils.setField(task1, "status", Task.Status.TODO);
+        ReflectionTestUtils.setField(task1, "priority", Task.Priority.LOW );
+        ReflectionTestUtils.setField(task1, "title", "우선순위낮은할일");
+        ReflectionTestUtils.setField(task1,"user",testUser);
+
+        Task task2 = new Task();
+        ReflectionTestUtils.setField(task2, "id", 2L);
+        ReflectionTestUtils.setField(task2, "status", Task.Status.TODO);
+        ReflectionTestUtils.setField(task2, "priority", Task.Priority.MEDIUM);
+        ReflectionTestUtils.setField(task2, "title", "우선순위중간할일");
+        ReflectionTestUtils.setField(task2,"user",testUser);
+
+        Task task3 = new Task();
+        ReflectionTestUtils.setField(task3, "id", 3L);
+        ReflectionTestUtils.setField(task3, "status", Task.Status.TODO);
+        ReflectionTestUtils.setField(task3, "priority", Task.Priority.HIGH);
+        ReflectionTestUtils.setField(task3, "title", "우선순위높은할일");
+        ReflectionTestUtils.setField(task3,"user",testUser);
+
+        List<Task> mockTasks = Arrays.asList(task3, task2, task1);
+        when(taskRepository.findTaskSortedByPriority(Task.Status.TODO)).thenReturn(mockTasks);
+
+        //when
+        List<TaskByPriorityDto> resultTasks = dashBoardService.todoSortedByPriority();
+
+        //then
+        assertEquals(Task.Priority.HIGH,resultTasks.get(0).getPriority());
+        assertEquals(Task.Priority.MEDIUM,resultTasks.get(1).getPriority());
+        assertEquals(Task.Priority.LOW,resultTasks.get(2).getPriority());
+        verify(taskRepository,times(1)).findTaskSortedByPriority(Task.Status.TODO);
+    }
+    @DisplayName("TODO 상태의 태스크를 우선순위기준으로 정렬")
+    @Test
+    void getIN_PROGRESSSortedByPriority() {
+        //given
+        User testUser = new User();
+        ReflectionTestUtils.setField(testUser, "id", 10L);
+
+        Task task1 = new Task();
+        ReflectionTestUtils.setField(task1, "id", 1L);
+        ReflectionTestUtils.setField(task1, "status", Task.Status.IN_PROGRESS);
+        ReflectionTestUtils.setField(task1, "priority", Task.Priority.LOW );
+        ReflectionTestUtils.setField(task1, "title", "우선순위낮은할일");
+        ReflectionTestUtils.setField(task1,"user",testUser);
+
+        Task task2 = new Task();
+        ReflectionTestUtils.setField(task2, "id", 2L);
+        ReflectionTestUtils.setField(task2, "status", Task.Status.IN_PROGRESS);
+        ReflectionTestUtils.setField(task2, "priority", Task.Priority.MEDIUM);
+        ReflectionTestUtils.setField(task2, "title", "우선순위중간할일");
+        ReflectionTestUtils.setField(task2,"user",testUser);
+
+        Task task3 = new Task();
+        ReflectionTestUtils.setField(task3, "id", 3L);
+        ReflectionTestUtils.setField(task3, "status", Task.Status.IN_PROGRESS);
+        ReflectionTestUtils.setField(task3, "priority", Task.Priority.HIGH);
+        ReflectionTestUtils.setField(task3, "title", "우선순위높은할일");
+        ReflectionTestUtils.setField(task3,"user",testUser);
+
+        List<Task> mockTasks = Arrays.asList(task3, task2, task1);
+        when(taskRepository.findTaskSortedByPriority(Task.Status.IN_PROGRESS)).thenReturn(mockTasks);
+
+        //when
+        List<TaskByPriorityDto> resultTasks = dashBoardService.inProgressSortedByPriority();
+
+        //then
+        assertEquals(Task.Priority.HIGH,resultTasks.get(0).getPriority());
+        assertEquals(Task.Priority.MEDIUM,resultTasks.get(1).getPriority());
+        assertEquals(Task.Priority.LOW,resultTasks.get(2).getPriority());
+        verify(taskRepository,times(1)).findTaskSortedByPriority(Task.Status.IN_PROGRESS);
     }
 }
