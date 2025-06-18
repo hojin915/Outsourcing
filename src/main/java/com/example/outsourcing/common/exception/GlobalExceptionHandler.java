@@ -15,9 +15,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -49,24 +48,31 @@ public class GlobalExceptionHandler {
 
     // @Valid로 DTO를 검증할 때 발생하는 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        // 검증 실패한 메시지를 모두 모아서 리스트로 반환
-        Map<String, String> errorMap = ex.getBindingResult()
+        // response에 입력한 내용 순서대로 정리
+        List<String> sortlist = Arrays.stream(Objects.requireNonNull(ex.getBindingResult()
+                                .getTarget()).getClass()
+                        .getDeclaredFields())
+                .map(Field::getName)
+                .toList();
+
+        // 예외처리 목록 순서대로 정리
+        List<FieldError> sortErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .collect(Collectors.toMap(
-                        FieldError::getField,
-                        fieldError -> Optional.ofNullable(fieldError.getDefaultMessage()).orElse(""),
-                        (existing, replacement) -> replacement));
+                .sorted(Comparator.comparingInt(e -> sortlist.indexOf(e.getField())))
+                .toList();
 
-        return getErrorResponse(status, errorMap);
+        // 첫번째 예외처리 문구
+        String errorMessage = sortErrors.get(0).getDefaultMessage();
+        return getErrorResponse(status, errorMessage);
     }
 
     // 예상하지 못한 모든 일반 예외 처리
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponseDto> handleException(Exception ex) {
+    public ResponseEntity<ErrorResponseDto> handleException(Exception ex) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         log.error("Exception: ", ex); // 전체 스택 트레이스 로그 출력
         return getErrorResponse(status, ex.getMessage());
@@ -74,15 +80,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-        if(ex.getCause() instanceof ConstraintViolationException
-        && ex.getCause().getMessage().contains("task_user_unique")){
+        if (ex.getCause() instanceof ConstraintViolationException
+                && ex.getCause().getMessage().contains("task_user_unique")) {
             HttpStatus status = HttpStatus.CONFLICT;
             return getErrorResponse(status, "이미 존재하는 Task-User 매핑입니다");
         }
         return getErrorResponse(HttpStatus.BAD_REQUEST, "데이터 무결성 오류가 발생했습니다");
     }
 
-    public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, Object message) {
+    public ResponseEntity<ErrorResponseDto> getErrorResponse(HttpStatus status, String message) {
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 message,
                 status.getReasonPhrase()
