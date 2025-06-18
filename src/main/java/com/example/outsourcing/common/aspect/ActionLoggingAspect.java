@@ -2,6 +2,7 @@ package com.example.outsourcing.common.aspect;
 
 import com.example.outsourcing.activitylog.entity.ActivityLog;
 import com.example.outsourcing.activitylog.service.ActivityLogService;
+import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.common.entity.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -51,33 +52,24 @@ public class ActionLoggingAspect {
         // 현재 로그인된 사용자 ID 추출
         String loggedInUserId = getCurrentLoggedInUserId();
 
-//        Long targetId = extractTargetId(joinPoint.getArgs());
-
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
-
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        Method method = methodSignature.getMethod();
-        Object[] args = joinPoint.getArgs();
-
-        String activityType = null;
-
         // activityType
-        if (methodName != null) {
-            activityType = methodName.toUpperCase();
-        }
+        String activityType = (methodName != null) ? methodName.toUpperCase() : null;
 
         Object result = null;
+        Long targetId = null;
 
         try {
             result = joinPoint.proceed();
+//            targetId = extractTargetIdFromResponse(result);
         } finally {
             long endTime = System.currentTimeMillis();
             Long executionTimeMs = endTime - startTime;
 
             Long userIdToLog = null;
             if (methodName.equals("signup") || methodName.equals("login")) {
-                userIdToLog = -1L;
+                userIdToLog = -1L; // 회원가입/로그인 시 초기 사용자 ID는 -1로 로깅
             } else if (loggedInUserId != null && !loggedInUserId.equals("anonymous")) {
                 try {
                     userIdToLog = Long.valueOf(loggedInUserId);
@@ -85,20 +77,7 @@ public class ActionLoggingAspect {
                     log.error("Error converting loggedInUserId to Long: " + loggedInUserId, e);
                 }
             }
-
-
-
-            for(int i = 0; i < method.getParameters().length; i++){
-                Parameter parameter = method.getParameters()[i];
-                log.info(parameter.toString());
-                if(parameter.isAnnotationPresent(PathVariable.class)){
-                    String paramName = parameter.getName();
-                    Object value = args[i];
-                    log.info("param: {} | value: {}", paramName, value);
-                }
-            }
-
-            // null 체크 및 로그 기록
+            // 필요한 정보가 모두 있을 때만 활동 로그 저장
             if (userIdToLog != null && activityType != null) {
                 ActivityLog activityLog = ActivityLog.builder()
                         .requestTime(requestTime)
@@ -107,7 +86,7 @@ public class ActionLoggingAspect {
                         .requestMethod(requestMethod)
                         .requestUrl(requestUrl)
                         .activityType(activityType)
-//                        .targetId(targetId)
+//                        .targetId(targetId) // 추출한 targetId 사용
                         .executionTimeMs(executionTimeMs)
                         .build();
 
@@ -115,16 +94,27 @@ public class ActionLoggingAspect {
 
             } else {
                 String missingInfo = "경고: 활동 로그 저장 실패 - 필수 정보 누락. " +
-                        "LoggedInUserId: " + loggedInUserId +
-                        ", ActivityType: " + activityType +
-//                        ", TargetId: " + targetId +
-                        ", ExecutionTimeMs: " + executionTimeMs +
-                        ", Method: " + joinPoint.getSignature().getName();
+                        "로그인된 사용자 ID: " + loggedInUserId +
+                        ", 활동 유형: " + activityType +
+//                        ", 대상 ID: " + (targetId != null ? targetId : "null") +
+                        ", 실행 시간: " + executionTimeMs +
+                        ", 메서드: " + joinPoint.getSignature().getName();
                 log.warn(missingInfo);
             }
         }
         return result;
     }
+
+//    private Long extractTargetIdFromResponse(Object responseObject) {
+//        // 응답 객체가 TargetIdentifiable 인터페이스를 구현했는지 확인
+//        if (responseObject instanceof TargetIdentifiable) {
+//            Long extractedId = ((TargetIdentifiable) responseObject).getTargetId();
+//            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출: {}", extractedId);
+//            return extractedId;
+//        }
+//        return null;
+//    }
+
 
     private String getCurrentLoggedInUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -146,7 +136,6 @@ public class ActionLoggingAspect {
 
         return request.getRemoteAddr();
     }
-
 
 
     private String getRequestMethod() {
