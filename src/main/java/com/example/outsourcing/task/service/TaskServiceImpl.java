@@ -47,7 +47,7 @@ public class TaskServiceImpl {
                 .build();
         Task saved = taskRepository.save(task);
 
-        return TaskResponseDto.builder()
+        TaskResponseDto responseDto = TaskResponseDto.builder()
                 .id(saved.getId())
                 .title(saved.getTitle())
                 .content(saved.getContent())
@@ -58,10 +58,13 @@ public class TaskServiceImpl {
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .build();
+        responseDto.setTargetId(saved.getId());
+
+        return responseDto;
     }
 
     public List<TaskResponseDto> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
+        List<Task> tasks = taskRepository.findByIsDeletedFalse();
 
         return tasks.stream()
                 .map(task -> TaskResponseDto.builder()
@@ -89,18 +92,21 @@ public class TaskServiceImpl {
 
         Page<Task> taskPage = taskRepository.findByCondition(taskStatus, keyword, pageable);
 
-        return taskPage.map(task -> TaskResponseDto.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .content(task.getContent())
-                .priority(task.getPriority())
-                .status(task.getStatus())
-                .dueDate(task.getDueDate())
-                .startDate(task.getStartDate())
-                .createdAt(task.getCreatedAt())
-                .updatedAt(task.getUpdatedAt())
-                .build()
-        );
+        return taskPage.map(task -> {
+            TaskResponseDto responseDto = TaskResponseDto.builder()
+                    .id(task.getId())
+                    .title(task.getTitle())
+                    .content(task.getContent())
+                    .priority(task.getPriority())
+                    .status(task.getStatus())
+                    .dueDate(task.getDueDate())
+                    .startDate(task.getStartDate())
+                    .createdAt(task.getCreatedAt())
+                    .updatedAt(task.getUpdatedAt())
+                    .build();
+            responseDto.setTargetId(task.getId());
+            return responseDto;
+        });
     }
 
     public void updateTaskStatus(Long id, Task.Status newStatus, Long currentUserId) {
@@ -120,6 +126,18 @@ public class TaskServiceImpl {
             task.setStartDate(LocalDateTime.now());
         }
 
+        taskRepository.save(task);
+    }
+
+    public void deleteTask(Long taskId, Long currentUserId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
+
+        if (!task.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("다른 사용자의 태스크는 삭제할 수 없습니다.");
+        }
+
+        task.softDelete();
         taskRepository.save(task);
     }
 
