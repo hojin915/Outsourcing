@@ -17,10 +17,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ManagerService {
-    private final UserService userService;
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final ManagerRepository managerRepository;
@@ -28,7 +29,7 @@ public class ManagerService {
     @Transactional
     public ManagerResponseDto registerManager(String username, Long taskId, ManagerRequestDto requestDto) {
         // 로그인한 유저
-        User user = userService.findByUsernameOrElseThrow(username);
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
         // 등록하려는 유저
         User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetId());
@@ -46,7 +47,7 @@ public class ManagerService {
 
     public ManagerResponseDto deleteManager(String username, Long taskId, ManagerRequestDto requestDto) {
         // 로그인한 유저
-        User user = userService.findByUsernameOrElseThrow(username);
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
         // 등록하려는 유저
         User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetId());
@@ -80,5 +81,9 @@ public class ManagerService {
         if(!user.getId().equals(task.getUser().getId())){
             throw new CustomException(ExceptionCode.NOT_AUTHOR);
         }
+    }
+
+    public void softDeleteManagers(List<Long>taskIds){
+        managerRepository.softDeleteManagersByTaskIds(taskIds);
     }
 }

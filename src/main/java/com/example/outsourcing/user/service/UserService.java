@@ -23,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -104,9 +105,12 @@ public class UserService {
         commonUserCheck(user, password);
 
         user.softDelete();
-
         taskRepository.softDeleteTasksByUserId(user.getId());
         commentRepository.softDeleteCommentsByUserId(user.getId());
+        managerRepository.softDeleteManagersByUserId(user.getId());
+        List<Long> taskIds = taskRepository.findTaskIdsByUserId(user.getId());
+        managerRepository.softDeleteManagersByTaskIds(taskIds);
+        commentRepository.softDeleteCommentsByTaskIds(taskIds);
 
         return new UserDeleteResponseDto(user.getId());
     }

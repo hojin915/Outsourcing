@@ -172,4 +172,8 @@ public class CommentService {
                 .map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()))
                 .toList();
     }
+
+    public void softDeleteComments(List<Long> taskIds) {
+        commentRepository.softDeleteCommentsByTaskIds(taskIds);
+    }
 }

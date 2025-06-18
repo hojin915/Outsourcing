@@ -1,5 +1,6 @@
 package com.example.outsourcing.task.service;
 
+import com.example.outsourcing.comment.service.CommentService;
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.AccessDeniedException;
 import com.example.outsourcing.manager.service.ManagerService;
@@ -32,6 +33,9 @@ public class TaskServiceImpl {
     private final TaskRepository taskRepository;
 
     private final UserRepository userRepository;
+
+    private final CommentService commentService;
+    private final ManagerService managerService;
 
     @Transactional
     public TaskResponseDto createTask(CreateTaskRequestDto RequestDto, AuthUser authUser) {
@@ -179,5 +183,10 @@ public class TaskServiceImpl {
 
     public List<Long> findTaskIdsByUserId(Long userId) {
         return taskRepository.findTaskIdsByUserId(userId);
+    }
+
+    public void softDeleteTasks(List<Long> taskIds) {
+        managerService.softDeleteManagers(taskIds);
+        commentService.softDeleteComments(taskIds);
     }
 }
