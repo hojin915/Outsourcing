@@ -6,6 +6,7 @@ import com.example.outsourcing.task.dto.CreateTaskRequestDto;
 import com.example.outsourcing.task.dto.TaskResponseDto;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.user.dto.response.UserSummaryResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -41,7 +42,7 @@ public class TaskServiceImpl {
                 .content(RequestDto.getContent())
                 .priority(RequestDto.getPriority())
                 .dueDate(RequestDto.getDueDate())
-                .status(Task.Status.TODO)
+                .status(status)
                 .startDate(status == Task.Status.IN_PROGRESS ? LocalDateTime.now() : null)
                 .user(user)
                 .build();
@@ -57,6 +58,14 @@ public class TaskServiceImpl {
                 .startDate(saved.getStartDate())
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
+                .assigneeId(user.getId())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .build()
+                )
                 .build();
         responseDto.setTargetId(saved.getId());
 
@@ -113,6 +122,10 @@ public class TaskServiceImpl {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
 
+        if (task.isDeleted()) {
+            throw new AccessDeniedException("삭제된 태스크는 상태를 변경할 수 없습니다.");
+        }
+
         if (!task.getUser().getId().equals(currentUserId)){
             throw new AccessDeniedException("다른 사용자의 태스크는 수정할 수 없습니다.");
         }
@@ -132,6 +145,10 @@ public class TaskServiceImpl {
     public void deleteTask(Long taskId, Long currentUserId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
+
+        if (task.isDeleted()) {
+            throw new AccessDeniedException("이미 삭제된 태스크입니다.");
+        }
 
         if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 삭제할 수 없습니다.");

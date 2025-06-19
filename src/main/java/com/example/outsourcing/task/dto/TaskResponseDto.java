@@ -2,6 +2,7 @@ package com.example.outsourcing.task.dto;
 
 import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.task.entity.Task;
+import com.example.outsourcing.user.dto.response.UserSummaryResponseDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,5 +31,8 @@ public class TaskResponseDto implements TargetIdentifiable {
     private LocalDateTime dueDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startDate;
+
+    private Long assigneeId;
+    private UserSummaryResponseDto assignee;
 
 }
