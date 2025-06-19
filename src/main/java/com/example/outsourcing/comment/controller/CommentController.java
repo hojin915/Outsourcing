@@ -27,39 +27,34 @@ public class CommentController {
 
     // 댓글 생성 컨트롤러
     @PostMapping("/tasks/{task_id}/comments")
-    public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated(@AuthenticationPrincipal AuthUser user,
-                                                                      @PathVariable("task_id") Long taskId,
-                                                                      @RequestBody CommentRequestDto requestDto) {
-
-
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentCreated(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable("task_id") Long taskId,
+            @RequestBody CommentRequestDto requestDto
+    ) {
         // 서비스 레이어의 commentCreated메서드에 매개변수 주입
         CommentDataDto response = commentService.commentCreated(user.getId(), taskId, requestDto.getComment());
 
         // response객체 생성
-        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
-                "댓글 생성이 완료되었습니다.",
-                response
-        );
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>("댓글이 생성되었습니다.", response);
 
         // 반환
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 
+    // GET /api/tasks/{taskId}/comments?page=0&size=10
     @GetMapping("/tasks/{task_id}/comments")
     public ResponseEntity<ResponseDto<CommentListResponseDto>> commentFindAll(
             @PathVariable("task_id") Long taskId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal AuthUser user
-            ) {
-
-
+    ) {
         // 서비스 레이어의 commentFindAll 메서드 호출
-        CommentListResponseDto commentListResponse = commentService.commentFindAll(taskId, user);
+        CommentListResponseDto commentListResponse = commentService.commentFindAll(taskId, page, size, user);
 
         // response객체 생성
-        ResponseDto<CommentListResponseDto> responseDto = new ResponseDto<>(
-                "댓글 조회가 완료되었습니다.",
-                commentListResponse
-        );
+        ResponseDto<CommentListResponseDto> responseDto = new ResponseDto<>("댓글 조회가 완료되었습니다.", commentListResponse);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -68,13 +63,9 @@ public class CommentController {
     @GetMapping("/comments/{comment_id}")
     public ResponseEntity<ResponseDto<CommentDataDto>> commentFindById(@PathVariable("comment_id") Long commentId) {
 
-
         CommentDataDto commentFindById = commentService.commentFindById(commentId);
 
-        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
-                "댓글 단건 조회가 완료되었습니다.",
-                commentFindById
-        );
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>("댓글 단건 조회가 완료되었습니다.", commentFindById);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -84,31 +75,26 @@ public class CommentController {
     public ResponseEntity<ResponseDto<CommentDataDto>> commentUpdate(
             @AuthenticationPrincipal AuthUser user,
             @PathVariable("comment_id") Long commentId,
-            @RequestBody CommentRequestDto requestDto) {
-
-
+            @RequestBody CommentRequestDto requestDto
+    ) {
         CommentDataDto response = commentService.commentUpdate(user.getId(), commentId, requestDto.getComment());
 
-        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
-                "댓글 수정이 완료되었습니다.",
-                response
-        );
+        ResponseDto<CommentDataDto> responseDto = new ResponseDto<>("댓글 수정이 완료되었습니다.", response);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 
     // 댓글 삭제 컨트롤러
-    @DeleteMapping("/comments/{comment_id}")
-    public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete(@AuthenticationPrincipal AuthUser user,
-                                                                       @PathVariable("comment_id") Long commentId) {
+    // DELETE /api/tasks/{taskId}/comments/{commentId}
+    @DeleteMapping("/{taskId}//comments/{comment_id}")
+    public ResponseEntity<ResponseDto<CommentDeleteDto>> commentDelete(
+            @AuthenticationPrincipal AuthUser user,
+            @PathVariable("taskId") Long taskId,
+            @PathVariable("comment_id") Long commentId
+    ) {
+        CommentDeleteDto response = commentService.commentdelete(user.getId(), taskId, commentId);
 
-
-        CommentDeleteDto response = commentService.commentdelete(user.getId(), commentId);
-
-        ResponseDto<CommentDeleteDto> responseDto = new ResponseDto<>(
-                "댓글 삭제가 완료되었습니다.",
-                response
-        );
+        ResponseDto<CommentDeleteDto> responseDto = new ResponseDto<>("댓글 삭제가 완료되었습니다.", response);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -118,15 +104,11 @@ public class CommentController {
     public ResponseEntity<ResponseDto<CommentSearchResponseDto>> commentFindTaskSearch(
             @PathVariable("task_id") Long taskId,
             @RequestBody CommentSearchRequestDto requestDto,
-            @AuthenticationPrincipal AuthUser user ) {
-
-
+            @AuthenticationPrincipal AuthUser user
+    ) {
         CommentSearchResponseDto commentSearchResponse = commentService.commentFindTaskSearch(taskId, requestDto.getSearch(), user);
 
-        ResponseDto<CommentSearchResponseDto> responseDto = new ResponseDto<>(
-                "댓글 검색이 완료되었습니다.",
-                commentSearchResponse
-        );
+        ResponseDto<CommentSearchResponseDto> responseDto = new ResponseDto<>("댓글 검색이 완료되었습니다.", commentSearchResponse);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
@@ -139,12 +121,8 @@ public class CommentController {
     ) {
         CommentAllSearchResponseDto commentSearchResponse = commentService.commentfindAllSearch(searchKeyword, user);
 
-
         // response객체 생성
-        ResponseDto<CommentAllSearchResponseDto> responseDto = new ResponseDto<>(
-                "댓글 검색이 완료되었습니다.",
-                commentSearchResponse
-        );
+        ResponseDto<CommentAllSearchResponseDto> responseDto = new ResponseDto<>("댓글 검색이 완료되었습니다.", commentSearchResponse);
 
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }

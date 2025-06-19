@@ -1,68 +1,101 @@
 package com.example.outsourcing.task.controller;
 
+import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.task.dto.*;
-import com.example.outsourcing.task.service.TaskServiceImpl;
+import com.example.outsourcing.task.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping
 @RequiredArgsConstructor
 public class TaskController {
 
-    private final TaskServiceImpl taskService;
+    private final TaskService taskService;
 
-    @PostMapping
-    public ResponseEntity<TaskResponseDto> createTask(
+    // Task 생성
+    @PostMapping("/api/tasks")
+    public ResponseEntity<ResponseDto<TaskResponseDto>> createTask(
             @RequestBody @Valid CreateTaskRequestDto requestDto,
             @AuthenticationPrincipal AuthUser authUser
     ) {
 
-        TaskResponseDto responseDto = taskService.createTask(requestDto, authUser);
+        ResponseDto<TaskResponseDto> responseDto = taskService.createTask(requestDto, authUser);
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMapping
-    public ResponseEntity<TaskListResponseDto> getAllTasks(
+    @GetMapping("/api/users")
+    public ResponseEntity<ResponseDto<List<TaskResponseDto>>> getAllTasks(
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        TaskListResponseDto response = taskService.getAllTasks(authUser);
+        ResponseDto<List<TaskResponseDto>> response = taskService.getAllTasks(authUser);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<TaskSearchResponseDto> getTasks(
+    // Task 목록 조회
+    // GET /api/tasks?status=TODO&page=0&size=10&search=기획&assigneeId=1
+    @GetMapping("/api/tasks")
+    public ResponseEntity<ResponseDto<TaskSearchResponseDto> > getTasks(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer assigneeId,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        TaskSearchResponseDto tasks = taskService.getTasks(status, keyword, page, size, authUser);
+        ResponseDto<TaskSearchResponseDto> tasks = taskService.getTasks(status, keyword, page, size, search ,assigneeId, authUser);
         return ResponseEntity.ok(tasks);
     }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<TaskResponseDto> updateTaskStatus(
-            @PathVariable Long id,
-            @RequestBody ChangeStatusRequestDto dto,
+    // Task 상세 조회
+    // GET /api/tasks/{taskId}
+    @GetMapping("/api/tasks/{taskId}")
+    public ResponseEntity<ResponseDto<TaskResponseDto>> getTaskBIyd(
+            @PathVariable Long taskId,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        TaskResponseDto updatedTask = taskService.updateTaskStatus(id, dto.getStatus(), authUser.getId());
+        ResponseDto<TaskResponseDto> task = taskService.getTaskBIyd(taskId, authUser.getId());
+        return ResponseEntity.ok(task);
+    }
+
+    // Task 수정
+    // PUT /api/tasks/{taskId}
+    @PatchMapping("/api/tasks/{taskId}")
+    public ResponseEntity<ResponseDto<TaskResponseDto>> updateTask(
+            @PathVariable Long taskId,
+            @RequestBody UpdateTaskRequestDto dto,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        ResponseDto<TaskResponseDto> updatedTask = taskService.updateTask(taskId, dto, authUser.getId());
         return ResponseEntity.ok(updatedTask);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<TaskResponseDto> deleteTask(
-            @PathVariable Long id,
+    // Task 상태 업데이트
+    // PATCH /api/tasks/{taskId}/status
+    @PatchMapping("/api/tasks/{taskId}/status")
+    public ResponseEntity<ResponseDto<TaskResponseDto>> updateTaskStatus(
+            @PathVariable Long taskId,
+            @RequestBody ChangeStatusRequestDto dto,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        TaskResponseDto deletedTask = taskService.deleteTask(id, authUser.getId());
+        ResponseDto<TaskResponseDto> updatedTask = taskService.updateTaskStatus(taskId, dto.getStatus(), authUser.getId());
+        return ResponseEntity.ok(updatedTask);
+    }
+
+    @DeleteMapping("/api/tasks/{taskId}")
+    public ResponseEntity<ResponseDto<TaskResponseDto>> deleteTask(
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        ResponseDto<TaskResponseDto> deletedTask = taskService.deleteTask(taskId, authUser.getId());
         return ResponseEntity.ok(deletedTask);
     }
 

@@ -11,6 +11,9 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +67,8 @@ public class CommentService {
 
     // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
-    public CommentListResponseDto  commentFindAll(Long taskId, AuthUser authUser) {
+    public CommentListResponseDto  commentFindAll(Long taskId, int page, int size, AuthUser authUser) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         // 태스크가 존재하지 않을 때 예외처리
         Task task = taskRepository.findById(taskId)
@@ -125,7 +129,7 @@ public class CommentService {
 
     // 댓글 삭제 비지니스 로직
     @Transactional
-    public CommentDeleteDto commentdelete(Long userId, Long commentId) {
+    public CommentDeleteDto commentdelete(Long userId, Long taskId, Long commentId) {
 
         Comment comment = commentRepository.findByCommentIdAndIsDeletedFalse(commentId);
 
