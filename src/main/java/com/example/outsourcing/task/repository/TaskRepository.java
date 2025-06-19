@@ -35,6 +35,21 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                Pageable pageable);
 
 
+ @Query("""
+    SELECT t FROM Task t
+    WHERE t.isDeleted = false
+      AND (:status IS NULL OR t.status = :status)
+      AND (
+        (:keyword IS NULL OR TRIM(:keyword) = '')
+        OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+    ORDER BY t.createdAt DESC
+""")
+ Page<Task> findByCondition(@Param("status") Task.Status status,
+                            @Param("keyword") String keyword,
+                            Pageable pageable);
+
     Optional<Task> findByIdAndIsDeletedFalse(Long id);
 
     default Task findByIdOrElseThrow(Long taskId) {
