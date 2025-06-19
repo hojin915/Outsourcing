@@ -22,4 +22,9 @@ public abstract class SoftDeleteEntity extends BaseEntity{
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void recover() {
+        this.isDeleted = false;
+        this.deletedAt = null;
+    }
 }

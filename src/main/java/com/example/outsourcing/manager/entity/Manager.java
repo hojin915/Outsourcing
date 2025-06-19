@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(uniqueConstraints = {
+@Table(name = "managers",
+        uniqueConstraints = {
         @UniqueConstraint(name = "task_user_unique", columnNames = {"task_id", "user_id"})
     }
 )

@@ -17,6 +17,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Aspect
@@ -50,8 +51,14 @@ public class ActionLoggingAspect {
 
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
+
         // activityType
-        String activityType = (methodName != null) ? methodName.toUpperCase() : null;
+        String activityType = null;
+        if (methodName != null) {
+            Pattern pattern = Pattern.compile("(?<=[a-z])(?=[A-Z])");
+            String snakeCase = pattern.matcher(methodName).replaceAll("_");
+            activityType = snakeCase.toUpperCase();
+        }
 
         Object result = null;
         Long targetId = null;

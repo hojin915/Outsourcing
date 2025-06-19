@@ -1,18 +1,15 @@
 package com.example.outsourcing.dashboard.controller;
 
 import com.example.outsourcing.common.dto.ResponseDto;
-import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
-import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
-import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
-import com.example.outsourcing.dashboard.dto.TotalCountsDto;
+import com.example.outsourcing.common.entity.AuthUser;
+import com.example.outsourcing.dashboard.dto.*;
 import com.example.outsourcing.dashboard.service.DashBoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,8 +23,10 @@ public class DashBoardController {
      * @return 전체 태스크중 삭제되지 않은 태스크의 개수 조회
      */
     @GetMapping("/tasks/total-count")
-    public ResponseEntity<ResponseDto<TotalCountsDto>> getTotalTaskCount() {
-        TotalCountsDto resultDto = dashBoardService.getTotalCount();
+    public ResponseEntity<ResponseDto<TotalCountsDto>> getTotalTaskCount(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        TotalCountsDto resultDto = dashBoardService.getTotalCount(authUser.getId());
 
         return ResponseEntity.ok()
                 .body(new ResponseDto<>("전체 태스크 개수", resultDto));
@@ -38,8 +37,10 @@ public class DashBoardController {
      * @return TODO, IN_PROGRESS, DONE 상태별 테스크 개수 조회
      */
     @GetMapping("/tasks/status-counts")
-    public ResponseEntity<ResponseDto<TaskStatusCountsDto>> getTaskStatusCounts() {
-        TaskStatusCountsDto resultDto = dashBoardService.getTaskStatusCounts();
+    public ResponseEntity<ResponseDto<TaskStatusCountsDto>> getTaskStatusCounts(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        TaskStatusCountsDto resultDto = dashBoardService.getTaskStatusCounts(authUser.getId());
         return ResponseEntity.ok().body(new ResponseDto<>("상태별 태스크 개수",resultDto));
     }
 
@@ -48,8 +49,10 @@ public class DashBoardController {
      * @return 완료율(소수점 둘째 자리까지 포매팅)
      */
     @GetMapping("/tasks/completion-rate")
-    public ResponseEntity<ResponseDto<TaskDoneRatioDto>> getDoneRatio() {
-        TaskDoneRatioDto resultDto = dashBoardService.getDoneRatio();
+    public ResponseEntity<ResponseDto<TaskDoneRatioDto>> getDoneRatio(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        TaskDoneRatioDto resultDto = dashBoardService.getDoneRatio(authUser.getId());
         return ResponseEntity.ok().body(new ResponseDto<>("태스크 완료율",resultDto));
     }
 
@@ -58,9 +61,11 @@ public class DashBoardController {
      * @return 마감기한이 지난 태스크 개수
      */
     @GetMapping("/tasks/overdue-count")
-    public ResponseEntity<ResponseDto<Long>> getOverdueCount() {
-        Long overdueCount = dashBoardService.getOverdueTaskCount();
-        return ResponseEntity.ok().body(new ResponseDto<>("기한 초과된 태스크 개수",overdueCount));
+    public ResponseEntity<ResponseDto<CountOverdueTaskDto>> getOverdueCount(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        CountOverdueTaskDto overdueTaskCount = dashBoardService.getOverdueTaskCount(authUser.getId());
+        return ResponseEntity.ok().body(new ResponseDto<>("기한 초과된 태스크 개수",overdueTaskCount));
     }
 
     /**
@@ -68,9 +73,11 @@ public class DashBoardController {
      * @return TODO 상태의 태스크 목록을 우선순위에따라 정렬하여 반환
      */
     @GetMapping("/tasks/sorted-priority/todo")
-    public ResponseEntity<ResponseDto<List<TaskByPriorityDto>>> getTodoSortedByPriority () {
-        List<TaskByPriorityDto> todoTasks = dashBoardService.todoSortedByPriority();
-        return ResponseEntity.ok().body(new ResponseDto<>("TODO 태스크 (우선순위 정렬)",todoTasks));
+    public ResponseEntity<ResponseDto<PriorityTaskForTargetIdDto>> getTodoSortedByPriority (
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.todoSortedByPriority(authUser.getId());
+        return ResponseEntity.ok().body(new ResponseDto<>("TODO 태스크 (우선순위 정렬)",priorityTaskForTargetIdDto));
     }
 
     /**
@@ -78,9 +85,11 @@ public class DashBoardController {
      * @return IN-PROGRESS 상태의 태스크 목록을 우선순위에 따라 정렬하여 반환
      */
     @GetMapping("/tasks/sorted-priority/in-progress")
-    public ResponseEntity<ResponseDto<List<TaskByPriorityDto>>> getInProgressSortedByPriority () {
-        List<TaskByPriorityDto> inProgressTasks = dashBoardService.inProgressSortedByPriority();
-        return ResponseEntity.ok().body(new ResponseDto<>("IN_PROGRESS 테스크 (우선순위 정렬)", inProgressTasks));
+    public ResponseEntity<ResponseDto<PriorityTaskForTargetIdDto>> getInProgressSortedByPriority (
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.inProgressSortedByPriority(authUser.getId());
+        return ResponseEntity.ok().body(new ResponseDto<>("IN_PROGRESS 테스크 (우선순위 정렬)", priorityTaskForTargetIdDto));
     }
 
 }
