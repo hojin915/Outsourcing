@@ -1,9 +1,6 @@
 package com.example.outsourcing.dashboard.service;
 
-import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
-import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
-import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
-import com.example.outsourcing.dashboard.dto.TotalCountsDto;
+import com.example.outsourcing.dashboard.dto.*;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
@@ -90,10 +87,10 @@ class DashBoardServiceTest {
         when(taskRepository.countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS)).thenReturn(expectedCount);
 
         //when
-        Long count = dashBoardService.getOverdueTaskCount();
+        CountOverdueTaskDto overdueTaskCount = dashBoardService.getOverdueTaskCount();
 
         //then
-        assertEquals(expectedCount, count);
+        assertEquals(expectedCount, overdueTaskCount.getCountOverdueTask());
         verify(taskRepository, times(1)).countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS);
     }
 
@@ -129,12 +126,12 @@ class DashBoardServiceTest {
         when(taskRepository.findTaskSortedByPriority(Task.Status.TODO)).thenReturn(mockTasks);
 
         //when
-        List<TaskByPriorityDto> resultTasks = dashBoardService.todoSortedByPriority();
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.todoSortedByPriority();
 
         //then
-        assertEquals(Task.Priority.HIGH,resultTasks.get(0).getPriority());
-        assertEquals(Task.Priority.MEDIUM,resultTasks.get(1).getPriority());
-        assertEquals(Task.Priority.LOW,resultTasks.get(2).getPriority());
+        assertEquals(Task.Priority.HIGH,priorityTaskForTargetIdDto.getTasksList().get(0).getPriority());
+        assertEquals(Task.Priority.MEDIUM,priorityTaskForTargetIdDto.getTasksList().get(1).getPriority());
+        assertEquals(Task.Priority.LOW,priorityTaskForTargetIdDto.getTasksList().get(2).getPriority());
         verify(taskRepository,times(1)).findTaskSortedByPriority(Task.Status.TODO);
     }
     @DisplayName("TODO 상태의 태스크를 우선순위기준으로 정렬")
@@ -169,12 +166,12 @@ class DashBoardServiceTest {
         when(taskRepository.findTaskSortedByPriority(Task.Status.IN_PROGRESS)).thenReturn(mockTasks);
 
         //when
-        List<TaskByPriorityDto> resultTasks = dashBoardService.inProgressSortedByPriority();
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.inProgressSortedByPriority();
 
         //then
-        assertEquals(Task.Priority.HIGH,resultTasks.get(0).getPriority());
-        assertEquals(Task.Priority.MEDIUM,resultTasks.get(1).getPriority());
-        assertEquals(Task.Priority.LOW,resultTasks.get(2).getPriority());
+        assertEquals(Task.Priority.HIGH,priorityTaskForTargetIdDto.getTasksList().get(0).getPriority());
+        assertEquals(Task.Priority.MEDIUM,priorityTaskForTargetIdDto.getTasksList().get(1).getPriority());
+        assertEquals(Task.Priority.LOW,priorityTaskForTargetIdDto.getTasksList().get(2).getPriority());
         verify(taskRepository,times(1)).findTaskSortedByPriority(Task.Status.IN_PROGRESS);
     }
 }
