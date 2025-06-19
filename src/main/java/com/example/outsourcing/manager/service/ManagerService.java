@@ -12,8 +12,12 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
+import com.example.outsourcing.user.service.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class ManagerService {
     private final TaskRepository taskRepository;
     private final ManagerRepository managerRepository;
 
+    @Transactional
     public ManagerResponseDto registerManager(String username, Long taskId, ManagerRequestDto requestDto) {
         // 로그인한 유저
         User user = userRepository.findByUsernameOrElseThrow(username);
@@ -76,5 +81,9 @@ public class ManagerService {
         if(!user.getId().equals(task.getUser().getId())){
             throw new CustomException(ExceptionCode.NOT_AUTHOR);
         }
+    }
+
+    public void softDeleteManagers(List<Long>taskIds){
+        managerRepository.softDeleteManagersByTaskIds(taskIds);
     }
 }

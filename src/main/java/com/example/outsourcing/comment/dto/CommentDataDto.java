@@ -1,12 +1,16 @@
 package com.example.outsourcing.comment.dto;
 
 import com.example.outsourcing.comment.entity.Comment;
+import com.example.outsourcing.common.dto.TargetIdentifiable;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class CommentDataDto {
+@Builder
+public class CommentDataDto implements TargetIdentifiable {
 
     // 댓글 속성
     private final Long commentId;
@@ -14,8 +18,11 @@ public class CommentDataDto {
     private final Long taskId;
     private final Long userId;
     private final CommentUserDto user;
+
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    @Setter
     private final Long targetId;
 
     // 댓글 생성자
@@ -23,7 +30,8 @@ public class CommentDataDto {
             Long commentId,
             String content,
             Long taskId,
-            Long userId, CommentUserDto user,
+            Long userId,
+            CommentUserDto user,
             LocalDateTime createdAt,
             LocalDateTime modifiedAt,
             Long targetId
@@ -50,5 +58,10 @@ public class CommentDataDto {
                 comment.getUpdatedAt(),
                 targetId
         );
+    }
+
+    @Override
+    public Long getTargetId() {
+        return this.targetId;
     }
 }

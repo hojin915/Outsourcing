@@ -1,21 +1,22 @@
 package com.example.outsourcing.comment.service;
 
-import com.example.outsourcing.comment.dto.CommentDataDto;
-import com.example.outsourcing.comment.dto.CommentDeleteDto;
+import com.example.outsourcing.comment.dto.*;
+import com.example.outsourcing.comment.dto.CommentSearchResponseDto;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
+import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.example.outsourcing.common.exception.exceptions.ExceptionCode.*;
 
@@ -64,7 +65,7 @@ public class CommentService {
 
     // 태스크 댓글 전체 조회 비지니스 로직
     @Transactional
-    public Page<CommentDataDto> commentFindAll(Long taskId, Pageable pageable) {
+    public CommentListResponseDto commentFindAll(Long taskId, Pageable pageable, AuthUser authUser) {
 
         // 태스크가 존재하지 않을 때 예외처리
         Task task = taskRepository.findByIdAndIsDeletedFalse(taskId)
@@ -72,9 +73,9 @@ public class CommentService {
 
         Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Comment> response = commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId(), commentPageble);
+        Page<Comment> commentPage = commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId(), commentPageble);
 
-        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
+        return CommentListResponseDto.fromPage(commentPage, authUser.getId());
     }
 
     // 댓글 단건 조회 비지니스 로직
@@ -132,7 +133,7 @@ public class CommentService {
 
     // 댓글 삭제 비지니스 로직
     @Transactional
-    public CommentDeleteDto commentdelete(Long userId, Long taskId, Long commentId) {
+    public CommentDataDto commentdelete(Long userId, Long taskId, Long commentId) {
 
         // 태스크가 존재하지 않을 때 예외처리
         taskRepository.findByIdAndIsDeletedFalse(taskId)
@@ -158,12 +159,13 @@ public class CommentService {
         comment.setDeleted(true);
         comment.setDeletedAt(LocalDateTime.now());
 
-        return CommentDeleteDto.toDto(comment, comment.getCommentId());
+        return CommentDataDto.toDto(comment, comment.getCommentId());
     }
 
     // 태스크별 댓글 검색 비지니스 로직
     @Transactional
-    public Page<CommentDataDto> commentFindTaskSearch(Long taskId,Pageable pageable, String search) {
+    public CommentSearchResponseDto commentFindTaskSearch(Long taskId, Pageable pageable, String search, AuthUser authUser) { // AuthUser 파라미터 추가
+
         // 태스크가 존재하지 않을 때 예외처리
         taskRepository.findByIdAndIsDeletedFalse(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
@@ -175,14 +177,16 @@ public class CommentService {
 
         Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Comment> response = commentRepository.findByTaskIdAndSearch(taskId, commentPageble, search);
+        Page<Comment> commentPage = commentRepository.findByTaskIdAndSearch(taskId, commentPageble, search);
 
-        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
+        return CommentSearchResponseDto.fromPage(commentPage, authUser.getId());
+
     }
 
     // 전체 댓글 검색 비지니스 로직
     @Transactional
-    public Page<CommentDataDto> commentfindAllSearch(Pageable pageable, String search) {
+    public CommentAllSearchResponseDto commentfindAllSearch(Pageable pageable, String search, AuthUser authUser) {
+
 
         // 입력받은 값이 null이거나 내용이 공백일 경우 예외처리
         if(search == null || search.trim().isEmpty()) {
@@ -190,8 +194,12 @@ public class CommentService {
         }
         Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Comment> response = commentRepository.findAllSearch(commentPageble, search);
+        Page<Comment> commentPage = commentRepository.findAllSearch(commentPageble, search);
 
-        return response.map(comment -> CommentDataDto.toDto(comment, comment.getCommentId()));
+        return CommentAllSearchResponseDto.fromPage(commentPage, authUser.getId());
+    }
+
+    public void softDeleteComments(List<Long> taskIds) {
+        commentRepository.softDeleteCommentsByTaskIds(taskIds);
     }
 }

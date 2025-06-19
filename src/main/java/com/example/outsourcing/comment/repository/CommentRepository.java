@@ -37,4 +37,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Modifying
     @Query("UPDATE Comment c SET c.isDeleted = true, c.deletedAt = CURRENT_TIMESTAMP WHERE c.user.id = :userId")
     void softDeleteCommentsByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("UPDATE Comment c SET c.isDeleted = true, c.deletedAt = CURRENT_TIMESTAMP WHERE c.task.id IN :taskIds")
+    void softDeleteCommentsByTaskIds(@Param("taskIds") List<Long> taskIds);
 }

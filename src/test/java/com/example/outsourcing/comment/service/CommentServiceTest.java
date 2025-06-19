@@ -1,10 +1,9 @@
 package com.example.outsourcing.comment.service;
 
-import com.example.outsourcing.comment.dto.CommentDataDto;
-import com.example.outsourcing.comment.dto.CommentDeleteDto;
+import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
-import com.example.outsourcing.common.enums.UserRole;
+import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
@@ -18,10 +17,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.outsourcing.common.enums.UserRole.USER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.*;
@@ -49,7 +50,7 @@ public class CommentServiceTest {
         Long taskId = 1L;
         String testText = "테스트 댓글입니다.";
 
-        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
+        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", USER);
         Task task = new Task(taskId);
         Comment comment = new Comment(task, user, testText);
 
@@ -70,8 +71,10 @@ public class CommentServiceTest {
 
         // given
         Long taskId = 1L;
-        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
+
+        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", USER);
         Task task = new Task(taskId);
+
         Pageable pageable = PageRequest.of(0, 10);
 
         Comment comment1 = new Comment(task, user, "댓글1");
@@ -79,15 +82,22 @@ public class CommentServiceTest {
 
         Page<Comment> commentPage = new PageImpl<>(List.of(comment1, comment2));
 
+        AuthUser authUser = new AuthUser(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
+        );
+
         when(taskRepository.findByIdAndIsDeletedFalse(taskId)).thenReturn(Optional.of(task));
         when(commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(taskId, pageable))
                 .thenReturn(commentPage);
 
         // when
-        Page<CommentDataDto> commentFindAll = commentService.commentFindAll(taskId, pageable);
+        CommentListResponseDto commentFindAll = commentService.commentFindAll(taskId, pageable, authUser);
 
         // then
-        assertTrue("리스트에 데이터가 없습니다.", commentFindAll.getContent().size() > 0);
+        assertNotNull( "댓글 리스트가 없습니다.", commentFindAll.getResults());
 
     }
 
@@ -155,7 +165,7 @@ public class CommentServiceTest {
         when(commentRepository.findByCommentIdAndIsDeletedFalse(commentId)).thenReturn(comment);
 
         // when
-        CommentDeleteDto commentdelete = commentService.commentdelete(userId, taskId, commentId);
+        CommentDataDto commentdelete = commentService.commentdelete(userId, taskId, commentId);
 
         // then
         assertEquals("수정되지 않았습니다.", commentdelete.getContent(), comment.getComment());
@@ -167,17 +177,28 @@ public class CommentServiceTest {
 
         // given
         Long taskId = 1L;
+        Long userId = 1L;
         String testSearch = "테스트 검색내용입니다.";
-        Pageable pageable = PageRequest.of(0, 10);
+
         Task task = new Task(taskId);
+        User user = new User(userId);
+
+        Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> commentPage = new PageImpl<>(List.of());
+
+        AuthUser authUser = new AuthUser(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
+        );
 
 
         when(taskRepository.findByIdAndIsDeletedFalse(taskId)).thenReturn(Optional.of(task));
         when(commentRepository.findByTaskIdAndSearch(taskId, pageable, testSearch)).thenReturn(commentPage);
 
         // when
-        Page<CommentDataDto> commentFindTaskSearch = commentService.commentFindTaskSearch(taskId, pageable, testSearch);
+        CommentSearchResponseDto commentFindTaskSearch = commentService.commentFindTaskSearch(taskId, pageable, testSearch, authUser);
 
         // then
         assertNotNull("검색 결과가 존재하지 않습니다.", commentFindTaskSearch);
@@ -187,14 +208,25 @@ public class CommentServiceTest {
     void 댓글_전체_검색_서비스_단위_테스트() {
 
         // given
+        Long userId = 1L;
         String testSearch = "테스트 검색내용입니다.";
+
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> commentPage = new PageImpl<>(List.of());
+
+        User user = new User(userId);
+
+        AuthUser authUser = new AuthUser(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getUserRole().name()))
+        );
 
         when(commentRepository.findAllSearch(pageable, testSearch)).thenReturn(commentPage);
 
         // when
-        Page<CommentDataDto> commentFindAllSearch = commentService.commentfindAllSearch(pageable, testSearch);
+        CommentAllSearchResponseDto commentFindAllSearch = commentService.commentfindAllSearch(pageable, testSearch, authUser);
 
         // then
         assertNotNull("검색 결과가 존재하지 않습니다.", commentFindAllSearch);
