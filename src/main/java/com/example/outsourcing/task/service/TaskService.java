@@ -6,8 +6,9 @@ import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.AccessDeniedException;
 import com.example.outsourcing.manager.service.ManagerService;
 import com.example.outsourcing.task.dto.*;
-        import com.example.outsourcing.task.entity.Task;
+import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.user.dto.response.UserSummaryResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,10 +63,13 @@ public class TaskService {
                 .priority(saved.getPriority())
                 .status(saved.getStatus())
                 .assigneeId(saved.getUser().getId())
-                .assignee(AssigneeDto.builder().id(saved.getUser().getId())
-                        .username(saved.getUser().getUsername())
-                        .name(saved.getUser().getName())
-                        .email(saved.getUser().getEmail()).build())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .build()
+                )
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .startDate(saved.getStartDate())
@@ -73,7 +78,7 @@ public class TaskService {
         return new ResponseDto<>("Task가 생성되었습니다.", responseDto);
     }
 
-    public ResponseDto<List<TaskResponseDto>> getAllTasks(AuthUser authUser) {
+    public ResponseDto<List<TaskResponseDto>> getAllTasks() {
         List<Task> tasks = taskRepository.findByIsDeletedFalse();
 
         List<TaskResponseDto> taskResponseDtos = tasks.stream()
@@ -85,10 +90,13 @@ public class TaskService {
                         .priority(task.getPriority())
                         .status(task.getStatus())
                         .assigneeId(task.getUser().getId())
-                        .assignee(AssigneeDto.builder().id(task.getUser().getId())
+                        .assignee(UserSummaryResponseDto.builder()
+                                .id(task.getUser().getId())
                                 .username(task.getUser().getUsername())
                                 .name(task.getUser().getName())
-                                .email(task.getUser().getEmail()).build())
+                                .email(task.getUser().getEmail())
+                                .build()
+                        )
                         .createdAt(task.getCreatedAt())
                         .updatedAt(task.getUpdatedAt())
                         .startDate(task.getStartDate())
@@ -96,7 +104,7 @@ public class TaskService {
                 )
                 .collect(Collectors.toList());
 
-        return new ResponseDto<>("Task가 getAllTasks.", taskResponseDtos);
+        return new ResponseDto<>("요청이 성공적으로 처리되었습니다.", taskResponseDtos);
     }
 
     public ResponseDto<TaskSearchResponseDto> getTasks(String status, String keyword, int page, int size, String search, Integer assigneeId, AuthUser authUser) {
@@ -118,10 +126,13 @@ public class TaskService {
                     .priority(task.getPriority())
                     .status(task.getStatus())
                     .assigneeId(task.getUser().getId())
-                    .assignee(AssigneeDto.builder().id(task.getUser().getId())
+                    .assignee(UserSummaryResponseDto.builder()
+                            .id(task.getUser().getId())
                             .username(task.getUser().getUsername())
                             .name(task.getUser().getName())
-                            .email(task.getUser().getEmail()).build())
+                            .email(task.getUser().getEmail())
+                            .build()
+                    )
                     .createdAt(task.getCreatedAt())
                     .updatedAt(task.getUpdatedAt())
                     .startDate(task.getStartDate())
@@ -134,7 +145,7 @@ public class TaskService {
         return new ResponseDto<>("Task 목록을 조회했습니다.", searchResponse);
     }
 
-    public ResponseDto<TaskResponseDto> getTaskBIyd(Long id, Long currentUserId) {
+    public ResponseDto<TaskResponseDto> getTaskBIyd(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
         TaskResponseDto build = TaskResponseDto.builder()
@@ -145,17 +156,19 @@ public class TaskService {
                 .priority(task.getPriority())
                 .status(task.getStatus())
                 .assigneeId(task.getUser().getId())
-                .assignee(AssigneeDto.builder().id(task.getUser().getId())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(task.getUser().getId())
                         .username(task.getUser().getUsername())
                         .name(task.getUser().getName())
-                        .email(task.getUser().getEmail()).build())
+                        .email(task.getUser().getEmail())
+                        .build()
+                )
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
                 .startDate(task.getStartDate())
                 .build();
         return new ResponseDto<>("Task를 조회했습니다.", build);
     }
-
     @Transactional
     public ResponseDto<TaskResponseDto> updateTask(Long id, UpdateTaskRequestDto dto, Long currentUserId) {
         Task task = taskRepository.findById(id)
@@ -164,7 +177,6 @@ public class TaskService {
         if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 수정할 수 없습니다.");
         }
-
 
         task.setTitle(dto.getTitle());
         task.setContent(dto.getDescription());
@@ -187,10 +199,13 @@ public class TaskService {
                 .priority(saved.getPriority())
                 .status(saved.getStatus())
                 .assigneeId(saved.getUser().getId())
-                .assignee(AssigneeDto.builder().id(saved.getUser().getId())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(saved.getUser().getId())
                         .username(saved.getUser().getUsername())
                         .name(saved.getUser().getName())
-                        .email(saved.getUser().getEmail()).build())
+                        .email(saved.getUser().getEmail())
+                        .build()
+                )
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .startDate(saved.getStartDate())
@@ -198,10 +213,15 @@ public class TaskService {
         return new ResponseDto<>("Task가 수정되었습니다.", build);
     }
 
+
     @Transactional
     public ResponseDto<TaskResponseDto> updateTaskStatus(Long id, Task.Status newStatus, Long currentUserId) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
+
+        if (task.isDeleted()) {
+            throw new AccessDeniedException("삭제된 태스크는 상태를 변경할 수 없습니다.");
+        }
 
         if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 수정할 수 없습니다.");
@@ -226,10 +246,13 @@ public class TaskService {
                 .priority(saved.getPriority())
                 .status(saved.getStatus())
                 .assigneeId(saved.getUser().getId())
-                .assignee(AssigneeDto.builder().id(saved.getUser().getId())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(saved.getUser().getId())
                         .username(saved.getUser().getUsername())
                         .name(saved.getUser().getName())
-                        .email(saved.getUser().getEmail()).build())
+                        .email(saved.getUser().getEmail())
+                        .build()
+                )
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .startDate(saved.getStartDate())
@@ -241,23 +264,49 @@ public class TaskService {
     public ResponseDto<TaskResponseDto> deleteTask(Long taskId, Long currentUserId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
+
+        if (task.isDeleted()) {
+            throw new AccessDeniedException("이미 삭제된 태스크입니다.");
+        }
+
         if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 삭제할 수 없습니다.");
         }
-        task.softDelete();
-        taskRepository.save(task);
 
-        return new ResponseDto<>("Task가 삭제되었습니다.", null);
+        task.softDelete();
+        List<Long> taskIds = new ArrayList<>();
+        taskIds.add(task.getId());
+        softDeleteTasksConnections(taskIds);
+
+        Task deletedTask = taskRepository.save(task);
+        TaskResponseDto build = TaskResponseDto.builder()
+                .id(deletedTask.getId())
+                .title(deletedTask.getTitle())
+                .description(deletedTask.getContent())
+                .dueDate(deletedTask.getDueDate())
+                .priority(deletedTask.getPriority())
+                .status(deletedTask.getStatus())
+                .assigneeId(deletedTask.getUser().getId())
+                .assignee(UserSummaryResponseDto.builder()
+                        .id(deletedTask.getUser().getId())
+                        .username(deletedTask.getUser().getUsername())
+                        .name(deletedTask.getUser().getName())
+                        .email(deletedTask.getUser().getEmail())
+                        .build()
+                )
+                .createdAt(deletedTask.getCreatedAt())
+                .updatedAt(deletedTask.getUpdatedAt())
+                .startDate(deletedTask.getStartDate())
+                .build();
+        return new ResponseDto<>("Task가 삭제되었습니다.", build);
     }
 
     public List<Long> findTaskIdsByUserId(Long userId) {
         return taskRepository.findTaskIdsByUserId(userId);
     }
 
-    public void softDeleteTasks(List<Long> taskIds) {
+    public void softDeleteTasksConnections(List<Long> taskIds) {
         managerService.softDeleteManagers(taskIds);
         commentService.softDeleteComments(taskIds);
     }
-
-
 }

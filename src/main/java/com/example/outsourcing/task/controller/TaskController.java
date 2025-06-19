@@ -33,14 +33,12 @@ public class TaskController {
 
     @GetMapping("/api/users")
     public ResponseEntity<ResponseDto<List<TaskResponseDto>>> getAllTasks(
-            @AuthenticationPrincipal AuthUser authUser
     ) {
-        ResponseDto<List<TaskResponseDto>> response = taskService.getAllTasks(authUser);
+        ResponseDto<List<TaskResponseDto>> response = taskService.getAllTasks();
         return ResponseEntity.ok(response);
     }
 
     // Task 목록 조회
-    // GET /api/tasks?status=TODO&page=0&size=10&search=기획&assigneeId=1
     @GetMapping("/api/tasks")
     public ResponseEntity<ResponseDto<TaskSearchResponseDto> > getTasks(
             @RequestParam(required = false) String status,
@@ -59,16 +57,15 @@ public class TaskController {
     // GET /api/tasks/{taskId}
     @GetMapping("/api/tasks/{taskId}")
     public ResponseEntity<ResponseDto<TaskResponseDto>> getTaskBIyd(
-            @PathVariable Long taskId,
-            @AuthenticationPrincipal AuthUser authUser
+            @PathVariable Long taskId
     ) {
-        ResponseDto<TaskResponseDto> task = taskService.getTaskBIyd(taskId, authUser.getId());
+        ResponseDto<TaskResponseDto> task = taskService.getTaskBIyd(taskId);
         return ResponseEntity.ok(task);
     }
 
     // Task 수정
     // PUT /api/tasks/{taskId}
-    @PatchMapping("/api/tasks/{taskId}")
+    @PutMapping("/api/tasks/{taskId}")
     public ResponseEntity<ResponseDto<TaskResponseDto>> updateTask(
             @PathVariable Long taskId,
             @RequestBody UpdateTaskRequestDto dto,
