@@ -26,7 +26,4 @@ public class CreateTaskRequestDto {
     private LocalDateTime dueDate;
 
     private Task.Status status;
-
-    @NotNull(message = "담당자 ID는 필수입니다.")
-    private Long assigneeId;
 }

@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class ManagerRequestDto {
-    private Long targetId;
+    private Long targetUserId;
 
-    public ManagerRequestDto(Long targetId) {
-        this.targetId = targetId;
+    public ManagerRequestDto(Long targetUserId) {
+        this.targetUserId = targetUserId;
     }
 }

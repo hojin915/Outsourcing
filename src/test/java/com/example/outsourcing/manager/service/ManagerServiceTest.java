@@ -53,8 +53,8 @@ public class ManagerServiceTest {
     public void manager_등록_정상작동_테스트() {
         // given
         Long taskId = 1L;
-        Long targetId = 3L;
-        ManagerRequestDto request = new ManagerRequestDto(targetId);
+        Long targetUserId = 3L;
+        ManagerRequestDto request = new ManagerRequestDto(targetUserId);
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
         // when
@@ -62,6 +62,6 @@ public class ManagerServiceTest {
 
         // then
         assertEquals(taskId, response.getTaskId());
-        assertEquals(targetId, response.getManagerId());
+        assertEquals(targetUserId, response.getManagerId());
     }
 }

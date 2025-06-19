@@ -34,13 +34,15 @@ public enum ExceptionCode {
     // 409
     ALREADY_EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다"),
     ALREADY_EXISTS_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다"),
+    ALREADY_EXISTS_MANAGER(HttpStatus.CONFLICT, "이미 존재하는 매니저입니다"),
 
     // 410
     DELETED_EMAIL(HttpStatus.GONE, "삭제된 이메일입니다"),
     DELETED_USERNAME(HttpStatus.GONE, "삭제된 아이디입니다"),
     DELETED_USER(HttpStatus.GONE, "삭제된 유저입니다"),
     DELETED_TASK(HttpStatus.GONE, "삭제된 일정입니다"),
-    DELETED_COMMENT(HttpStatus.GONE, "삭제된 댓글입니다");
+    DELETED_COMMENT(HttpStatus.GONE, "삭제된 댓글입니다"),
+    DELETED_MANAGER(HttpStatus.GONE, "삭제된 매니저입니다");
 
     // 추가적인 Exception 가능
 
