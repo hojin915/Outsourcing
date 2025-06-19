@@ -7,6 +7,7 @@ import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.manager.repository.ManagerRepository;
+import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.task.service.TaskServiceImpl;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
@@ -115,7 +116,7 @@ public class UserService {
         // commentRepository.softDeleteCommentsByTaskIds(taskIds);
 
         // task, user 마지막에 softDelete
-        taskRepository.softDeleteTasksByUserId(user.getId());
+        taskRepository.softDeleteTasksByUserId(Task.Status.TODO, user.getId());
         user.softDelete();
 
         return new UserDeleteResponseDto(user.getId());
