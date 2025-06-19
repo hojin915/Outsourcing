@@ -49,6 +49,7 @@ public class Task extends SoftDeleteEntity {
     @Column(name = "start_date")
     private LocalDateTime startDate;
 
+    @Builder.Default
     @OneToMany(mappedBy = "task")
     private List<Comment> comments = new ArrayList<>();
 

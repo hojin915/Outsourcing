@@ -22,7 +22,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("""
                 SELECT t FROM Task t
-                WHERE (:status IS NULL OR t.status = :status)
+                WHERE t.isDeleted = false
+                  AND (:status IS NULL OR t.status = :status)
                   AND (
                     (:keyword IS NULL OR TRIM(:keyword) = '')
                     OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))

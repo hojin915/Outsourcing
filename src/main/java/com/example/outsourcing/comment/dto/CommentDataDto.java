@@ -23,7 +23,7 @@ public class CommentDataDto implements TargetIdentifiable {
     private LocalDateTime modifiedAt;
 
     @Setter
-    private final Long targetId;
+    private Long targetId;
 
     // 댓글 생성자
     public CommentDataDto(
