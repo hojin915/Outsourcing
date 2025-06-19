@@ -1,13 +1,13 @@
 package com.example.outsourcing.comment.dto;
 
 import com.example.outsourcing.comment.entity.Comment;
+import com.example.outsourcing.common.dto.TargetIdentifiable;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
-public class CommentDeleteDto {
+public class CommentDeleteDto implements TargetIdentifiable {
 
     // 댓글 속성
     private final Long commentId;
@@ -60,5 +60,10 @@ public class CommentDeleteDto {
                 comment.getDeletedAt(),
                 targetId
         );
+    }
+
+    @Override
+    public Long getTargetId() {
+        return this.targetId;
     }
 }

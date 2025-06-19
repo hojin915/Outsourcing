@@ -18,6 +18,7 @@ public class CommentDataDto implements TargetIdentifiable {
     private final String comment;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
     private final Long targetId;
 
     // 댓글 생성자
@@ -53,5 +54,10 @@ public class CommentDataDto implements TargetIdentifiable {
                 comment.getUpdatedAt(),
                 targetId
         );
+    }
+
+    @Override
+    public Long getTargetId() {
+        return this.targetId;
     }
 }
