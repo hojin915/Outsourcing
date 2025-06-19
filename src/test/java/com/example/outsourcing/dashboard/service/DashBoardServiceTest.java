@@ -4,6 +4,7 @@ import com.example.outsourcing.dashboard.dto.*;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,12 +30,20 @@ class DashBoardServiceTest {
     @InjectMocks
     private DashBoardService dashBoardService;
 
+    private User testUser;
+    private Long testUserId;
+
+    @BeforeEach
+    void setUp() {
+        this.testUserId = 10L; // 모든 테스트에서 동일한 ID 사용
+        this.testUser = new User();
+        ReflectionTestUtils.setField(testUser, "id", testUserId);
+    }
 
     @DisplayName("삭제되지않은 총 태스크 개수 조회")
     @Test
     void getTotalCount() {
         //given
-        Long testUserId = 1L;
         when(taskRepository.getTotalCount()).thenReturn(10L);
         //when
         TotalCountsDto result = dashBoardService.getTotalCount(testUserId);
@@ -56,7 +65,7 @@ class DashBoardServiceTest {
         when(taskRepository.countTaskByStatus()).thenReturn(mockResult);
 
         //when
-        TaskStatusCountsDto result = dashBoardService.getTaskStatusCounts();
+        TaskStatusCountsDto result = dashBoardService.getTaskStatusCounts(10L);
 
         //then
         assertEquals(8L, result.getTodo());
@@ -74,10 +83,10 @@ class DashBoardServiceTest {
         when(taskRepository.getCountDoneTasks()).thenReturn(3L);
 
         //when
-        TaskDoneRatioDto result = dashBoardService.getDoneRatio();
+        TaskDoneRatioDto doneRatio = dashBoardService.getDoneRatio(10L);
 
         //then
-        assertEquals("30.00",result.getCompletionRatio());
+        assertEquals("30.00",doneRatio.getCompletionRatio());
 
     }
 
@@ -89,7 +98,7 @@ class DashBoardServiceTest {
         when(taskRepository.countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS)).thenReturn(expectedCount);
 
         //when
-        CountOverdueTaskDto overdueTaskCount = dashBoardService.getOverdueTaskCount();
+        CountOverdueTaskDto overdueTaskCount = dashBoardService.getOverdueTaskCount(10L);
 
         //then
         assertEquals(expectedCount, overdueTaskCount.getCountOverdueTask());
@@ -100,9 +109,6 @@ class DashBoardServiceTest {
     @Test
     void getTodoSortedByPriority() {
         //given
-        User testUser = new User();
-        ReflectionTestUtils.setField(testUser, "id", 10L);
-
         Task task1 = new Task();
         ReflectionTestUtils.setField(task1, "id", 1L);
         ReflectionTestUtils.setField(task1, "status", Task.Status.TODO);
@@ -128,7 +134,7 @@ class DashBoardServiceTest {
         when(taskRepository.findTaskSortedByPriority(Task.Status.TODO)).thenReturn(mockTasks);
 
         //when
-        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.todoSortedByPriority();
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.todoSortedByPriority(10L);
 
         //then
         assertEquals(Task.Priority.HIGH,priorityTaskForTargetIdDto.getTasksList().get(0).getPriority());
@@ -140,9 +146,6 @@ class DashBoardServiceTest {
     @Test
     void getIN_PROGRESSSortedByPriority() {
         //given
-        User testUser = new User();
-        ReflectionTestUtils.setField(testUser, "id", 10L);
-
         Task task1 = new Task();
         ReflectionTestUtils.setField(task1, "id", 1L);
         ReflectionTestUtils.setField(task1, "status", Task.Status.IN_PROGRESS);
@@ -168,7 +171,7 @@ class DashBoardServiceTest {
         when(taskRepository.findTaskSortedByPriority(Task.Status.IN_PROGRESS)).thenReturn(mockTasks);
 
         //when
-        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.inProgressSortedByPriority();
+        PriorityTaskForTargetIdDto priorityTaskForTargetIdDto = dashBoardService.inProgressSortedByPriority(10L);
 
         //then
         assertEquals(Task.Priority.HIGH,priorityTaskForTargetIdDto.getTasksList().get(0).getPriority());
