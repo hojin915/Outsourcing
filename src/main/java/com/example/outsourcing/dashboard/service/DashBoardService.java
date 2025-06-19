@@ -1,9 +1,6 @@
 package com.example.outsourcing.dashboard.service;
 
-import com.example.outsourcing.dashboard.dto.TaskByPriorityDto;
-import com.example.outsourcing.dashboard.dto.TaskDoneRatioDto;
-import com.example.outsourcing.dashboard.dto.TaskStatusCountsDto;
-import com.example.outsourcing.dashboard.dto.TotalCountsDto;
+import com.example.outsourcing.dashboard.dto.*;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.task.entity.Task;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,7 @@ public class DashBoardService {
     /**
      * @return 삭제되지않은 총 테스크의 개수 조회
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public TotalCountsDto getTotalCount() {
         Long totalCount = taskRepository.getTotalCount();
         return new TotalCountsDto(totalCount);
@@ -34,7 +31,7 @@ public class DashBoardService {
      * TODO, IN_PROGRESS, DONE 상태별 테스크 개수 조회
      * @return TaskStatusCountsDto 객체
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public TaskStatusCountsDto getTaskStatusCounts() {
         //쿼리결과 Object=(enum : Long)
         List<Object[]> results = taskRepository.countTaskByStatus();
@@ -63,7 +60,7 @@ public class DashBoardService {
      * 전체 태스크 중 완료된 태스크의 비율을 조회
      * 계산식: (DONE 상태 태스크 수 / 전체 태스크 수) × 100 (소수점 둘째 자리까지 표시)
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public TaskDoneRatioDto getDoneRatio() {
 
         Long totalTasks = taskRepository.getTotalCount();
@@ -86,35 +83,38 @@ public class DashBoardService {
      *
      * @return OverdueCountDto
      */
-    @Transactional(readOnly = true)
-    public Long getOverdueTaskCount() {
-        return taskRepository.countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS);
+    @Transactional
+    public CountOverdueTaskDto getOverdueTaskCount() {
+        long countOverdue = taskRepository.countOverdueTasks(Task.Status.TODO, Task.Status.IN_PROGRESS);
+        return new CountOverdueTaskDto(countOverdue,1L);
     }
 
 
     /**TODO 상태의 태스크 목록을 우선순위 기준으로 정렬
      *
-     * @return
+     * @return 정렬된 태스크목록 반환
      */
-    @Transactional(readOnly = true)
-    public List<TaskByPriorityDto> todoSortedByPriority() {
+    @Transactional
+    public PriorityTaskForTargetIdDto todoSortedByPriority() {
         List<Task> todoTasks = taskRepository.findTaskSortedByPriority(Task.Status.TODO);
 
-        return todoTasks.stream()
+        List<TaskByPriorityDto> tasksDto = todoTasks.stream()
                 .map(TaskByPriorityDto::new)
                 .toList();
+        return new PriorityTaskForTargetIdDto(tasksDto, 1L);
     }
     /**IN_PROGRESS 상태의 태스크 목록을 우선순위 기준으로 정렬
      *
-     * @return
+     * @return 정렬된 태스크목록 반환
      */
-    @Transactional(readOnly = true)
-    public List<TaskByPriorityDto> inProgressSortedByPriority() {
+    @Transactional
+    public PriorityTaskForTargetIdDto inProgressSortedByPriority() {
         List<Task> todoTasks = taskRepository.findTaskSortedByPriority(Task.Status.IN_PROGRESS);
 
-        return todoTasks.stream()
+        List<TaskByPriorityDto> tasksDto = todoTasks.stream()
                 .map(TaskByPriorityDto::new)
                 .toList();
+        return new PriorityTaskForTargetIdDto(tasksDto, 1L);
     }
 
 
