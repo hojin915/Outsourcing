@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -23,13 +22,13 @@ public class CommentAllSearchResponseDto implements TargetIdentifiable {
     public static CommentAllSearchResponseDto fromPage(Page<Comment> page, Long targetId) {
         List<CommentDataDto> results = page.getContent().stream()
                 .map(comment -> CommentDataDto.builder()
-                        .commentId(comment.getCommentId())
+                        .id(comment.getCommentId())
                         .content(comment.getComment())
                         .taskId(comment.getTask().getId())
                         .userId(comment.getUser().getId())
                         .user(CommentUserDto.toDto(comment.getUser()))
                         .createdAt(comment.getCreatedAt())
-                        .modifiedAt(comment.getUpdatedAt())
+                        .updatedAt(comment.getUpdatedAt())
                         .targetId(targetId)
                         .build()
                 )

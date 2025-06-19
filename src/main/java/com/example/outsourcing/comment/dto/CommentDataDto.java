@@ -13,36 +13,36 @@ import java.time.LocalDateTime;
 public class CommentDataDto implements TargetIdentifiable {
 
     // 댓글 속성
-    private final Long commentId;
+    private final Long id;
     private final String content;
     private final Long taskId;
     private final Long userId;
     private final CommentUserDto user;
 
     private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    private LocalDateTime updatedAt;
 
     @Setter
     private Long targetId;
 
     // 댓글 생성자
     public CommentDataDto(
-            Long commentId,
+            Long id,
             String content,
             Long taskId,
             Long userId,
             CommentUserDto user,
             LocalDateTime createdAt,
-            LocalDateTime modifiedAt,
+            LocalDateTime updatedAt,
             Long targetId
     ) {
-        this.commentId = commentId;
+        this.id = id;
         this.content = content;
         this.taskId = taskId;
         this.userId = userId;
         this.user = user;
         this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
+        this.updatedAt = updatedAt;
         this.targetId = targetId;
     }
 
