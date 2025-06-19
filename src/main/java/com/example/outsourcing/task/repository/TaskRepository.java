@@ -43,8 +43,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     }
 
     @Modifying
-    @Query("UPDATE Task t SET t.isDeleted = true, t.deletedAt = CURRENT_TIMESTAMP WHERE t.user.id = :userId")
-    void softDeleteTasksByUserId(@Param("userId") Long userId);
+    @Query("UPDATE Task t " +
+           "SET t.isDeleted = true, t.deletedAt = CURRENT_TIMESTAMP, t.status = :status, t.startDate = null " +
+           "WHERE t.user.id = :userId"
+    )
+    void softDeleteTasksByUserId(
+            @Param("status") Task.Status status,
+            @Param("userId") Long userId
+    );
 
     // 상태로 필터링
     List<Task> findByStatus(Task.Status status);
