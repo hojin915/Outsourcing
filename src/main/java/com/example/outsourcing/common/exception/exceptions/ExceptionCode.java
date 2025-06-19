@@ -11,6 +11,7 @@ public enum ExceptionCode {
     COMMENT_BAD_REQUEST(HttpStatus.BAD_REQUEST, "내용을 입력해야합니다"),
     COMMENT_UPDATED_BAD_REQUEST(HttpStatus.BAD_REQUEST, "기존 내용과 동일한 내용입니다"),
     COMMENT_AUTHOR_MISMATCH(HttpStatus.BAD_REQUEST, "작성자가 아닙니다"),
+    TASK_COMMENT_MISMATCH(HttpStatus.BAD_REQUEST, "해당 태스크에 존재하지 않는 댓글입니다"),
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다"),
 
     UNSUPPORTED_JWT_TOKENS(HttpStatus.BAD_REQUEST, "지원되지 않는 JWT 토큰 입니다."),
@@ -34,13 +35,15 @@ public enum ExceptionCode {
     // 409
     ALREADY_EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다"),
     ALREADY_EXISTS_USERNAME(HttpStatus.CONFLICT, "이미 존재하는 아이디입니다"),
+    ALREADY_EXISTS_MANAGER(HttpStatus.CONFLICT, "이미 존재하는 매니저입니다"),
 
     // 410
     DELETED_EMAIL(HttpStatus.GONE, "삭제된 이메일입니다"),
     DELETED_USERNAME(HttpStatus.GONE, "삭제된 아이디입니다"),
     DELETED_USER(HttpStatus.GONE, "삭제된 유저입니다"),
     DELETED_TASK(HttpStatus.GONE, "삭제된 일정입니다"),
-    DELETED_COMMENT(HttpStatus.GONE, "삭제된 댓글입니다");
+    DELETED_COMMENT(HttpStatus.GONE, "삭제된 댓글입니다"),
+    DELETED_MANAGER(HttpStatus.GONE, "삭제된 매니저입니다");
 
     // 추가적인 Exception 가능
 

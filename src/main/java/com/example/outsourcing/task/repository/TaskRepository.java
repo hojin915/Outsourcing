@@ -34,7 +34,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                @Param("keyword") String keyword,
                                Pageable pageable);
 
-    Optional<Task> findById(Long id);
+
+    Optional<Task> findByIdAndIsDeletedFalse(Long id);
 
     default Task findByIdOrElseThrow(Long taskId) {
         return findById(taskId)
