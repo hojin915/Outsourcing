@@ -49,6 +49,7 @@ public class CommentController {
             @PageableDefault Pageable pageable,
             @AuthenticationPrincipal AuthUser user
     ) {
+
         // 서비스 레이어의 commentFindAll 메서드 호출
         CommentListResponseDto commentPageResponse = commentService.commentFindAll(taskId, pageable, user);
 
@@ -62,9 +63,11 @@ public class CommentController {
     }
 
     // 댓글 단건 조회 컨트롤러
-    @GetMapping("/comments/{comment_id}")
-    public ResponseEntity<ResponseDto<CommentDataDto>> commentFindById(@PathVariable Long comment_id) {
-        CommentDataDto commentFindById = commentService.commentFindById(comment_id);
+    @GetMapping("/comments/{commentId}")
+    public ResponseEntity<ResponseDto<CommentDataDto>> commentFindById(@PathVariable Long commentId) {
+
+
+        CommentDataDto commentFindById = commentService.commentFindById(commentId);
 
         ResponseDto<CommentDataDto> responseDto = new ResponseDto<>(
                 "댓글 단건 조회가 완료되었습니다.",
