@@ -5,6 +5,7 @@ import com.example.outsourcing.comment.entity.Comment;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,42 +14,35 @@ import java.util.List;
 @Builder
 public class CommentAllSearchResponseDto implements TargetIdentifiable {
 
-    private Long commentId;
-    private Long taskId;
-    private Long userId;
-    private String username;
-    private String comment;
-
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
-
-    private List<CommentAllSearchResponseDto> searchResults;
+    private List<CommentDataDto> searchResults;
 
     @Setter
     private Long targetId;
 
-    public static CommentAllSearchResponseDto fromEntity(Comment comment) {
-        return CommentAllSearchResponseDto.builder()
-                .commentId(comment.getCommentId())
-                .taskId(comment.getTask().getId())
-                .userId(comment.getUser().getId())
-                .username(comment.getUser().getUsername())
-                .comment(comment.getComment())
-                .createdAt(comment.getCreatedAt())
-                .modifiedAt(comment.getUpdatedAt())
-                .build();
-    }
 
-    public static CommentAllSearchResponseDto fromList(
-            List<CommentAllSearchResponseDto> searchList, Long loggingTargetId) {
+    public static CommentAllSearchResponseDto fromPage(Page<Comment> page, Long targetId) {
+        List<CommentDataDto> results = page.getContent().stream()
+                .map(comment -> CommentDataDto.builder()
+                        .commentId(comment.getCommentId())
+                        .content(comment.getComment())
+                        .taskId(comment.getTask().getId())
+                        .userId(comment.getUser().getId())
+                        .user(CommentUserDto.toDto(comment.getUser()))
+                        .createdAt(comment.getCreatedAt())
+                        .modifiedAt(comment.getUpdatedAt())
+                        .targetId(targetId)
+                        .build()
+                )
+                .toList();
+
         return CommentAllSearchResponseDto.builder()
-                .searchResults(searchList)
-                .targetId(loggingTargetId)
+                .searchResults(results)
+                .targetId(targetId)
                 .build();
     }
 
     @Override
     public Long getTargetId() {
-        return this.targetId != null ? this.targetId : this.userId;
+        return targetId;
     }
 }
