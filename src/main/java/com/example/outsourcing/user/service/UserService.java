@@ -3,7 +3,6 @@ package com.example.outsourcing.user.service;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
-import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;

@@ -2,8 +2,6 @@ package com.example.outsourcing.manager.service;
 
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
-import com.example.outsourcing.common.exception.exceptions.NotFoundException;
-import com.example.outsourcing.common.exception.exceptions.UnauthorizedException;
 import com.example.outsourcing.manager.dto.ManagerRequestDto;
 import com.example.outsourcing.manager.dto.ManagerResponseDto;
 import com.example.outsourcing.manager.entity.Manager;
@@ -12,7 +10,6 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
-import com.example.outsourcing.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
