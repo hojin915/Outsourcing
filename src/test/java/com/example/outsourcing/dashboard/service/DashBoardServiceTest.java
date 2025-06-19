@@ -34,11 +34,13 @@ class DashBoardServiceTest {
     @Test
     void getTotalCount() {
         //given
+        Long testUserId = 1L;
         when(taskRepository.getTotalCount()).thenReturn(10L);
         //when
-        TotalCountsDto result = dashBoardService.getTotalCount();
+        TotalCountsDto result = dashBoardService.getTotalCount(testUserId);
         //then
         assertEquals(10L, result.getTotalCount());
+        assertEquals(testUserId, result.getTargetId());
         verify(taskRepository, times(1)).getTotalCount();
     }
 

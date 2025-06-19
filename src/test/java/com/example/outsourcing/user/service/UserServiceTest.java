@@ -204,7 +204,7 @@ public class UserServiceTest {
         assertEquals(user.getId(), response.getTargetId());
         assertTrue(user.isDeleted());
 
-        verify(taskRepository).softDeleteTasksByUserId(anyLong());
+        verify(taskRepository).softDeleteTasksByUserId(any(), anyLong());
         verify(commentRepository).softDeleteCommentsByUserId(anyLong());
     }
 }

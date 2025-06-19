@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -165,7 +166,12 @@ public class TaskServiceImpl {
         if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 삭제할 수 없습니다.");
         }
+
         task.softDelete();
+        List<Long> taskIds = new ArrayList<>();
+        taskIds.add(task.getId());
+        softDeleteTasksConnections(taskIds);
+
         Task deletedTask = taskRepository.save(task);
         return TaskResponseDto.builder()
                 .id(deletedTask.getId())
@@ -184,7 +190,7 @@ public class TaskServiceImpl {
         return taskRepository.findTaskIdsByUserId(userId);
     }
 
-    public void softDeleteTasks(List<Long> taskIds) {
+    public void softDeleteTasksConnections(List<Long> taskIds) {
         managerService.softDeleteManagers(taskIds);
         commentService.softDeleteComments(taskIds);
     }
