@@ -9,7 +9,7 @@ import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.manager.repository.ManagerRepository;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
-import com.example.outsourcing.task.service.TaskServiceImpl;
+import com.example.outsourcing.task.service.TaskService;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
@@ -23,7 +23,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,7 +31,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
-    private final TaskServiceImpl taskServiceImpl;
+    private final TaskService taskServiceImpl;
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final ManagerRepository managerRepository;

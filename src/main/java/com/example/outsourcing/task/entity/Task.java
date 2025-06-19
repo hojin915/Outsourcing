@@ -29,26 +29,27 @@ public class Task extends SoftDeleteEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.TODO;
+    private LocalDateTime dueDate;
 
     // 변경
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Priority priority;
 
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
-
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private LocalDateTime dueDate;
+    private Status status = Status.TODO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Builder.Default
     @OneToMany(mappedBy = "task")
     private List<Comment> comments = new ArrayList<>();
 

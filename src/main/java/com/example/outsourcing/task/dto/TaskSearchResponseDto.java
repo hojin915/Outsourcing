@@ -12,10 +12,10 @@ import java.util.List;
 @Builder
 public class TaskSearchResponseDto implements TargetIdentifiable {
     private List<TaskResponseDto> content;
-    private int pageNumber;
-    private int pageSize;
     private long totalElements;
     private int totalPages;
+    private int size;
+    private int number;
     private boolean last;
 
     @Setter
@@ -24,10 +24,10 @@ public class TaskSearchResponseDto implements TargetIdentifiable {
     public static TaskSearchResponseDto fromPage(Page<TaskResponseDto> page) {
         return TaskSearchResponseDto.builder()
                 .content(page.getContent())
-                .pageNumber(page.getNumber())
-                .pageSize(page.getSize())
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
+                .size(page.getSize())
+                .number(page.getNumber())
                 .last(page.isLast())
                 .build();
     }

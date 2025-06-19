@@ -1,7 +1,6 @@
 package com.example.outsourcing.dashboard.dto;
 
 import com.example.outsourcing.common.dto.TargetIdentifiable;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

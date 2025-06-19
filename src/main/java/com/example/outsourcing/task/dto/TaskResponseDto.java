@@ -6,7 +6,6 @@ import com.example.outsourcing.user.dto.response.UserSummaryResponseDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +15,7 @@ public class TaskResponseDto implements TargetIdentifiable {
 
     private Long id;
     private String title;
-    private String content;
+    private String description;
     private Task.Priority priority;
     private Task.Status status;
 
@@ -36,6 +35,5 @@ public class TaskResponseDto implements TargetIdentifiable {
     public Long getTargetId() {
         return this.id;
     }
-
 
 }

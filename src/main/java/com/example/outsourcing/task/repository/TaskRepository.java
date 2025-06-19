@@ -22,7 +22,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("""
                 SELECT t FROM Task t
-                WHERE (:status IS NULL OR t.status = :status)
+                WHERE t.isDeleted = false
+                  AND (:status IS NULL OR t.status = :status)
                   AND (
                     (:keyword IS NULL OR TRIM(:keyword) = '')
                     OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -34,22 +35,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                @Param("keyword") String keyword,
                                Pageable pageable);
 
-
- @Query("""
-    SELECT t FROM Task t
-    WHERE t.isDeleted = false
-      AND (:status IS NULL OR t.status = :status)
-      AND (
-        (:keyword IS NULL OR TRIM(:keyword) = '')
-        OR LOWER(t.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        OR LOWER(t.content) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      )
-    ORDER BY t.createdAt DESC
-""")
- Page<Task> findByCondition(@Param("status") Task.Status status,
-                            @Param("keyword") String keyword,
-                            Pageable pageable);
-
     Optional<Task> findByIdAndIsDeletedFalse(Long id);
 
     default Task findByIdOrElseThrow(Long taskId) {
@@ -60,8 +45,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Modifying
     @Query("UPDATE Task t " +
-           "SET t.isDeleted = true, t.deletedAt = CURRENT_TIMESTAMP, t.status = :status, t.startDate = null " +
-           "WHERE t.user.id = :userId"
+            "SET t.isDeleted = true, t.deletedAt = CURRENT_TIMESTAMP, t.status = :status, t.startDate = null " +
+            "WHERE t.user.id = :userId"
     )
     void softDeleteTasksByUserId(
             @Param("status") Task.Status status,
@@ -116,7 +101,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             WHEN 'MEDIUM' THEN 2 
             WHEN 'LOW' THEN 3 END ASC""")
     List<Task> findTaskSortedByPriority(@Param("status") Task.Status status);
-
 
 
     @Query("SELECT t.id from Task t WHERE t.user.id = :userId and t.isDeleted = false")
