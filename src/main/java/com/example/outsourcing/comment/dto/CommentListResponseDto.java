@@ -7,14 +7,17 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.Page;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Builder
 public class CommentListResponseDto implements TargetIdentifiable {
 
-    private List<CommentDataDto> results;
+    private List<CommentDataDto> content;
+    private long totalElements;
+    private int totalPages;
+    private int size;
+    private int number;
 
     @Setter
     private Long targetId;
@@ -23,20 +26,24 @@ public class CommentListResponseDto implements TargetIdentifiable {
     public static CommentListResponseDto fromPage(Page<Comment> page, Long targetId) {
         List<CommentDataDto> results = page.getContent().stream()
                 .map(comment -> CommentDataDto.builder()
-                        .commentId(comment.getCommentId())
+                        .id(comment.getCommentId())
                         .content(comment.getComment())
                         .taskId(comment.getTask().getId())
                         .userId(comment.getUser().getId())
                         .user(CommentUserDto.toDto(comment.getUser()))
                         .createdAt(comment.getCreatedAt())
-                        .modifiedAt(comment.getUpdatedAt())
+                        .updatedAt(comment.getUpdatedAt())
                         .targetId(targetId)
                         .build()
                 )
                 .toList();
 
         return CommentListResponseDto.builder()
-                .results(results)
+                .content(results)
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .size(page.getSize())
+                .number(page.getNumber())
                 .targetId(targetId)
                 .build();
     }

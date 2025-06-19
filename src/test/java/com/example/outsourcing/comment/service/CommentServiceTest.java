@@ -97,7 +97,7 @@ public class CommentServiceTest {
         CommentListResponseDto commentFindAll = commentService.commentFindAll(taskId, pageable, authUser);
 
         // then
-        assertNotNull( "댓글 리스트가 없습니다.", commentFindAll.getResults());
+        assertNotNull( "댓글 리스트가 없습니다.", commentFindAll.getContent());
 
     }
 
@@ -165,7 +165,7 @@ public class CommentServiceTest {
         when(commentRepository.findByCommentIdAndIsDeletedFalse(commentId)).thenReturn(comment);
 
         // when
-        CommentDataDto commentdelete = commentService.commentdelete(userId, taskId, commentId);
+        CommentDataDto commentdelete = commentService.commentDelete(userId, taskId, commentId);
 
         // then
         assertEquals("수정되지 않았습니다.", commentdelete.getContent(), comment.getComment());

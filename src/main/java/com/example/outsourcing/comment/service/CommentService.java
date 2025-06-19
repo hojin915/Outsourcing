@@ -71,9 +71,9 @@ public class CommentService {
         Task task = taskRepository.findByIdAndIsDeletedFalse(taskId)
                 .orElseThrow(() -> new CustomException(TASK_NOT_FOUND));
 
-        Pageable commentPageble = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+        Pageable commentPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
 
-        Page<Comment> commentPage = commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId(), commentPageble);
+        Page<Comment> commentPage = commentRepository.findAllByTaskIdAndIsDeletedFalseOrderByCreatedAtDesc(task.getId(), commentPageable);
 
         return CommentListResponseDto.fromPage(commentPage, authUser.getId());
     }
@@ -133,7 +133,7 @@ public class CommentService {
 
     // 댓글 삭제 비지니스 로직
     @Transactional
-    public CommentDataDto commentdelete(Long userId, Long taskId, Long commentId) {
+    public CommentDataDto commentDelete(Long userId, Long taskId, Long commentId) {
 
         // 태스크가 존재하지 않을 때 예외처리
         taskRepository.findByIdAndIsDeletedFalse(taskId)
