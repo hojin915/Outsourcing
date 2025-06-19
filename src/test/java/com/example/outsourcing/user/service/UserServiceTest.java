@@ -6,7 +6,10 @@ import com.example.outsourcing.common.config.PasswordEncoder;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
+import com.example.outsourcing.manager.repository.ManagerRepository;
+import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.task.service.TaskService;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
@@ -21,9 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,6 +57,12 @@ public class UserServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private TaskService taskService;
+
+    @Mock
+    private ManagerRepository managerRepository;
 
     private String username;
     private String email;
@@ -193,18 +204,25 @@ public class UserServiceTest {
     @Test
     public void auth_회원탈퇴_정상작동() {
         // given
+        Long userId = user.getId();
+
         UserDeleteRequestDto request = new UserDeleteRequestDto(password);
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrElseThrow(anyString())).thenReturn(user);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+        List<Long> taskIds = List.of(10L, 11L);
+        when(userRepository.findByUsernameOrElseThrow(username)).thenReturn(user);
+        when(taskService.findTaskIdsByUserId(userId)).thenReturn(taskIds);
 
         // when
         UserDeleteResponseDto response = userService.delete(username, request);
 
         // then
-        assertEquals(user.getId(), response.getTargetId());
-        assertTrue(user.isDeleted());
+        verify(commentRepository).softDeleteCommentsByUserId(userId);
+        verify(managerRepository).softDeleteManagersByUserId(userId);
+        verify(taskService).softDeleteTasksConnections(taskIds);
+        verify(taskRepository).softDeleteTasksByUserId(Task.Status.TODO, userId);
 
-        verify(taskRepository).softDeleteTasksByUserId(any(), anyLong());
-        verify(commentRepository).softDeleteCommentsByUserId(anyLong());
+        assertTrue(user.isDeleted());
     }
 }
