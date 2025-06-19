@@ -104,13 +104,16 @@ public class UserService {
 
         commonUserCheck(user, password);
 
-        user.softDelete();
-        taskRepository.softDeleteTasksByUserId(user.getId());
+        // 유저가 작성한 댓글, 일정 관리자 softDelete
         commentRepository.softDeleteCommentsByUserId(user.getId());
         managerRepository.softDeleteManagersByUserId(user.getId());
+        // 유저가 작성한 task 에 연결된 댓글, 관리자 softDelete
         List<Long> taskIds = taskRepository.findTaskIdsByUserId(user.getId());
         managerRepository.softDeleteManagersByTaskIds(taskIds);
         commentRepository.softDeleteCommentsByTaskIds(taskIds);
+        // task, user 마지막에 softDelete
+        taskRepository.softDeleteTasksByUserId(user.getId());
+        user.softDelete();
 
         return new UserDeleteResponseDto(user.getId());
     }
