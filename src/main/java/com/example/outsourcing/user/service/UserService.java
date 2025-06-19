@@ -3,12 +3,13 @@ package com.example.outsourcing.user.service;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.common.config.JwtUtil;
 import com.example.outsourcing.common.config.PasswordEncoder;
-import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.common.exception.exceptions.CustomException;
 import com.example.outsourcing.common.exception.exceptions.ExceptionCode;
 import com.example.outsourcing.manager.repository.ManagerRepository;
+import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
+import com.example.outsourcing.task.service.TaskServiceImpl;
 import com.example.outsourcing.user.dto.request.UserDeleteRequestDto;
 import com.example.outsourcing.user.dto.request.UserLoginRequestDto;
 import com.example.outsourcing.user.dto.request.UserSignupRequestDto;
@@ -22,14 +23,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TaskServiceImpl taskServiceImpl;
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
+    private final ManagerRepository managerRepository;
 
     public UserSignupResponseDto signup(UserSignupRequestDto request) {
         String username = request.getUsername();
@@ -98,9 +104,20 @@ public class UserService {
 
         commonUserCheck(user, password);
 
-        user.softDelete();
-        taskRepository.softDeleteTasksByUserId(user.getId());
+        // 유저가 작성한 댓글, 일정 관리자 softDelete
         commentRepository.softDeleteCommentsByUserId(user.getId());
+        managerRepository.softDeleteManagersByUserId(user.getId());
+
+        // 유저가 작성한 task 에 연결된 댓글, 관리자 softDelete
+        List<Long> taskIds = taskServiceImpl.findTaskIdsByUserId(user.getId());
+        taskServiceImpl.softDeleteTasksConnections(taskIds);
+        // log 관련 문제생기면 직접 repository 참조
+        // managerRepository.softDeleteManagersByTaskIds(taskIds);
+        // commentRepository.softDeleteCommentsByTaskIds(taskIds);
+
+        // task, user 마지막에 softDelete
+        taskRepository.softDeleteTasksByUserId(Task.Status.TODO, user.getId());
+        user.softDelete();
 
         return new UserDeleteResponseDto(user.getId());
     }

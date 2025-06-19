@@ -20,9 +20,6 @@ public class TaskResponseDto implements TargetIdentifiable {
     private Task.Priority priority;
     private Task.Status status;
 
-    @Setter
-    private Long targetId;
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -34,5 +31,11 @@ public class TaskResponseDto implements TargetIdentifiable {
 
     private Long assigneeId;
     private UserSummaryResponseDto assignee;
+
+    @Override
+    public Long getTargetId() {
+        return this.id;
+    }
+
 
 }

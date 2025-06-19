@@ -10,17 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Aspect
@@ -31,7 +28,7 @@ public class ActionLoggingAspect {
     private final ActivityLogService activityLogService;
 
     // Pointcut: *Service 패키지 내의 모든 메서드에 AOP 적용
-    @Pointcut("execution(* com.example.outsourcing.*.*.*Service.*(..)) " +
+    @Pointcut("execution(* com.example.outsourcing.*.*.*Service*.*(..)) " +
             "&& !execution(* com.example.outsourcing.activitylog.service.ActivityLogService.*(..))")
     public void ServiceMethods() {
     }
@@ -54,22 +51,28 @@ public class ActionLoggingAspect {
 
         Signature signature = joinPoint.getSignature();
         String methodName = signature.getName();
+
         // activityType
-        String activityType = (methodName != null) ? methodName.toUpperCase() : null;
+        String activityType = null;
+        if (methodName != null) {
+            Pattern pattern = Pattern.compile("(?<=[a-z])(?=[A-Z])");
+            String snakeCase = pattern.matcher(methodName).replaceAll("_");
+            activityType = snakeCase.toUpperCase();
+        }
 
         Object result = null;
         Long targetId = null;
 
         try {
             result = joinPoint.proceed();
-//            targetId = extractTargetIdFromResponse(result);
+            targetId = extractTargetIdFromResponse(result);
         } finally {
             long endTime = System.currentTimeMillis();
             Long executionTimeMs = endTime - startTime;
 
             Long userIdToLog = null;
             if (methodName.equals("signup") || methodName.equals("login")) {
-                userIdToLog = -1L; // 회원가입/로그인 시 초기 사용자 ID는 -1로 로깅
+                userIdToLog = -1L; // 회원가입, 로그인 시 초기 사용자 ID는 -1 을로 반환
             } else if (loggedInUserId != null && !loggedInUserId.equals("anonymous")) {
                 try {
                     userIdToLog = Long.valueOf(loggedInUserId);
@@ -86,7 +89,7 @@ public class ActionLoggingAspect {
                         .requestMethod(requestMethod)
                         .requestUrl(requestUrl)
                         .activityType(activityType)
-//                        .targetId(targetId) // 추출한 targetId 사용
+                        .targetId(targetId)
                         .executionTimeMs(executionTimeMs)
                         .build();
 
@@ -96,7 +99,7 @@ public class ActionLoggingAspect {
                 String missingInfo = "경고: 활동 로그 저장 실패 - 필수 정보 누락. " +
                         "로그인된 사용자 ID: " + loggedInUserId +
                         ", 활동 유형: " + activityType +
-//                        ", 대상 ID: " + (targetId != null ? targetId : "null") +
+                        ", 대상 ID: " + (targetId != null ? targetId : "null") +
                         ", 실행 시간: " + executionTimeMs +
                         ", 메서드: " + joinPoint.getSignature().getName();
                 log.warn(missingInfo);
@@ -105,15 +108,14 @@ public class ActionLoggingAspect {
         return result;
     }
 
-//    private Long extractTargetIdFromResponse(Object responseObject) {
-//        // 응답 객체가 TargetIdentifiable 인터페이스를 구현했는지 확인
-//        if (responseObject instanceof TargetIdentifiable) {
-//            Long extractedId = ((TargetIdentifiable) responseObject).getTargetId();
-//            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출: {}", extractedId);
-//            return extractedId;
-//        }
-//        return null;
-//    }
+    private Long extractTargetIdFromResponse(Object responseObject) {
+        if (responseObject instanceof TargetIdentifiable) {
+            Long extractedId = ((TargetIdentifiable) responseObject).getTargetId();
+            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출 결과 확인 : {}", extractedId);
+            return extractedId;
+        }
+        return null;
+    }
 
 
     private String getCurrentLoggedInUserId() {

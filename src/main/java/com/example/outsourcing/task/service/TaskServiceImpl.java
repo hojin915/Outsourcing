@@ -1,26 +1,32 @@
 package com.example.outsourcing.task.service;
 
+import com.example.outsourcing.comment.service.CommentService;
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.common.exception.AccessDeniedException;
+import com.example.outsourcing.manager.service.ManagerService;
 import com.example.outsourcing.task.dto.CreateTaskRequestDto;
+import com.example.outsourcing.task.dto.TaskListResponseDto;
 import com.example.outsourcing.task.dto.TaskResponseDto;
+import com.example.outsourcing.task.dto.TaskSearchResponseDto;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.dto.response.UserSummaryResponseDto;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.outsourcing.common.exception.AccessDeniedException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,9 @@ public class TaskServiceImpl {
     private final TaskRepository taskRepository;
 
     private final UserRepository userRepository;
+
+    private final CommentService commentService;
+    private final ManagerService managerService;
 
     @Transactional
     public TaskResponseDto createTask(CreateTaskRequestDto RequestDto, AuthUser authUser) {
@@ -46,6 +55,7 @@ public class TaskServiceImpl {
                 .startDate(status == Task.Status.IN_PROGRESS ? LocalDateTime.now() : null)
                 .user(user)
                 .build();
+        task.addManagers(user);
         Task saved = taskRepository.save(task);
 
         TaskResponseDto responseDto = TaskResponseDto.builder()
@@ -67,15 +77,14 @@ public class TaskServiceImpl {
                         .build()
                 )
                 .build();
-        responseDto.setTargetId(saved.getId());
 
         return responseDto;
     }
 
-    public List<TaskResponseDto> getAllTasks() {
+    public TaskListResponseDto getAllTasks(AuthUser authUser) {
         List<Task> tasks = taskRepository.findByIsDeletedFalse();
 
-        return tasks.stream()
+        List<TaskResponseDto> taskResponseDtos = tasks.stream()
                 .map(task -> TaskResponseDto.builder()
                         .id(task.getId())
                         .title(task.getTitle())
@@ -88,10 +97,16 @@ public class TaskServiceImpl {
                         .updatedAt(task.getUpdatedAt())
                         .build()
                 )
-                .toList();
+                .collect(Collectors.toList());
+
+        return TaskListResponseDto.builder()
+                .tasks(taskResponseDtos)
+                .targetId(authUser.getId())
+                .build();
+
     }
 
-    public Page<TaskResponseDto> getTasks(String status, String keyword, int page, int size) {
+    public TaskSearchResponseDto getTasks(String status, String keyword, int page, int size, AuthUser authUser) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         Task.Status taskStatus = null;
@@ -101,8 +116,8 @@ public class TaskServiceImpl {
 
         Page<Task> taskPage = taskRepository.findByCondition(taskStatus, keyword, pageable);
 
-        return taskPage.map(task -> {
-            TaskResponseDto responseDto = TaskResponseDto.builder()
+        Page<TaskResponseDto> responseDtoPage = taskPage.map(task -> {
+            return TaskResponseDto.builder()
                     .id(task.getId())
                     .title(task.getTitle())
                     .content(task.getContent())
@@ -113,12 +128,16 @@ public class TaskServiceImpl {
                     .createdAt(task.getCreatedAt())
                     .updatedAt(task.getUpdatedAt())
                     .build();
-            responseDto.setTargetId(task.getId());
-            return responseDto;
         });
+
+        TaskSearchResponseDto searchResponse = TaskSearchResponseDto.fromPage(responseDtoPage);
+        searchResponse.setTargetId(authUser.getId());
+
+        return searchResponse;
     }
 
-    public void updateTaskStatus(Long id, Task.Status newStatus, Long currentUserId) {
+    @Transactional
+    public TaskResponseDto updateTaskStatus(Long id, Task.Status newStatus, Long currentUserId) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
 
@@ -126,11 +145,12 @@ public class TaskServiceImpl {
             throw new AccessDeniedException("삭제된 태스크는 상태를 변경할 수 없습니다.");
         }
 
-        if (!task.getUser().getId().equals(currentUserId)){
+       
+        if (!task.getUser().getId().equals(currentUserId)) {
             throw new AccessDeniedException("다른 사용자의 태스크는 수정할 수 없습니다.");
         }
 
-        if (!task.getStatus().canTransitionTo(newStatus)){
+        if (!task.getStatus().canTransitionTo(newStatus)) {
             throw new AccessDeniedException("상태 변경이 허용되지 않습니다.");
         }
 
@@ -139,10 +159,23 @@ public class TaskServiceImpl {
             task.setStartDate(LocalDateTime.now());
         }
 
-        taskRepository.save(task);
+        Task updatedTask = taskRepository.save(task);
+
+        return TaskResponseDto.builder()
+                .id(updatedTask.getId())
+                .title(updatedTask.getTitle())
+                .content(updatedTask.getContent())
+                .priority(updatedTask.getPriority())
+                .status(updatedTask.getStatus())
+                .dueDate(updatedTask.getDueDate())
+                .startDate(updatedTask.getStartDate())
+                .createdAt(updatedTask.getCreatedAt())
+                .updatedAt(updatedTask.getUpdatedAt())
+                .build();
     }
 
-    public void deleteTask(Long taskId, Long currentUserId) {
+    @Transactional
+    public TaskResponseDto deleteTask(Long taskId, Long currentUserId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 태스크를 찾을 수 없습니다."));
 
@@ -155,8 +188,30 @@ public class TaskServiceImpl {
         }
 
         task.softDelete();
-        taskRepository.save(task);
+        List<Long> taskIds = new ArrayList<>();
+        taskIds.add(task.getId());
+        softDeleteTasksConnections(taskIds);
+
+        Task deletedTask = taskRepository.save(task);
+        return TaskResponseDto.builder()
+                .id(deletedTask.getId())
+                .title(deletedTask.getTitle())
+                .content(deletedTask.getContent())
+                .priority(deletedTask.getPriority())
+                .status(deletedTask.getStatus())
+                .dueDate(deletedTask.getDueDate())
+                .startDate(deletedTask.getStartDate())
+                .createdAt(deletedTask.getCreatedAt())
+                .updatedAt(deletedTask.getUpdatedAt())
+                .build();
     }
 
+    public List<Long> findTaskIdsByUserId(Long userId) {
+        return taskRepository.findTaskIdsByUserId(userId);
+    }
 
+    public void softDeleteTasksConnections(List<Long> taskIds) {
+        managerService.softDeleteManagers(taskIds);
+        commentService.softDeleteComments(taskIds);
+    }
 }
