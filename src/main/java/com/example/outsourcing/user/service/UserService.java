@@ -35,6 +35,7 @@ public class UserService {
     private final TaskRepository taskRepository;
     private final CommentRepository commentRepository;
     private final ManagerRepository managerRepository;
+    private final UserQueryService userQueryService;
 
     public UserSignupResponseDto signup(UserSignupRequestDto request) {
         String username = request.getUsername();
@@ -68,7 +69,7 @@ public class UserService {
         String password = request.getPassword();
 
         // 아이디 없을 경우 예외처리
-        User user = findByUsernameOrElseThrow(username);
+        User user = userQueryService.findByUsernameOrElseThrow(username);
 
         commonUserCheck(user, password);
 
@@ -97,7 +98,7 @@ public class UserService {
     @Transactional
     public UserDeleteResponseDto delete(String username, UserDeleteRequestDto request) {
         // 유저가 없을 시 예외처리
-        User user = userRepository.findByUsernameOrElseThrow(username);
+        User user = userQueryService.findByUsernameOrElseThrow(username);
 
         String password = request.getPassword();
 
@@ -131,9 +132,6 @@ public class UserService {
         }
     }
 
-    // username 으로 유저 못찾을 경우 예외처리
-    // 예외처리 Repository -> Service 이동
-    // 기존 사용으로 인해 Repository 내부 메서드 유지
     public User findByUsernameOrElseThrow(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
