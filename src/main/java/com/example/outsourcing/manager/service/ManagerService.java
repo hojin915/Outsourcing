@@ -10,6 +10,7 @@ import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
 import com.example.outsourcing.user.repository.UserRepository;
+import com.example.outsourcing.user.service.UserQueryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class ManagerService {
     private final UserRepository userRepository;
     private final TaskRepository taskRepository;
     private final ManagerRepository managerRepository;
+    private final UserQueryService userQueryService;
 
     @Transactional
     public ManagerResponseDto registerManager(String username, Long taskId, ManagerRequestDto requestDto) {
@@ -60,10 +62,10 @@ public class ManagerService {
     @Transactional
     public ManagerResponseDto deleteManager(String username, Long taskId, ManagerRequestDto requestDto) {
         // 로그인한 유저
-        User user = userRepository.findByUsernameOrElseThrow(username);
+        User user = userQueryService.findByUsernameOrElseThrow(username);
 
         // 등록하려는 유저
-        User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetUserId());
+        User targetUser = userQueryService.findByIdOrElseThrow(requestDto.getTargetUserId());
 
         // 매니저 등록할 일정
         Task task = taskRepository.findByIdOrElseThrow(taskId);

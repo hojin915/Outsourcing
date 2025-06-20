@@ -4,6 +4,9 @@ import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.entity.AuthUser;
 import com.example.outsourcing.task.dto.*;
 import com.example.outsourcing.task.service.TaskService;
+import com.example.outsourcing.user.dto.response.UserProfileResponseDto;
+import com.example.outsourcing.user.service.UserQueryService;
+import com.example.outsourcing.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +14,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
 public class TaskController {
-
+    private final UserQueryService userQueryService;
     private final TaskService taskService;
 
     // Task 생성
@@ -32,9 +36,13 @@ public class TaskController {
     }
 
     @GetMapping("/api/users")
-    public ResponseEntity<ResponseDto<List<TaskResponseDto>>> getAllTasks(
+    public ResponseEntity<ResponseDto<List<UserProfileResponseDto>>> getAllUsers (
     ) {
-        ResponseDto<List<TaskResponseDto>> response = taskService.getAllTasks();
+        List<UserProfileResponseDto> responseData = userQueryService.getAllUsers()
+                .stream()
+                .map(UserProfileResponseDto::new)
+                .toList();
+        ResponseDto<List<UserProfileResponseDto>> response =  new ResponseDto<>("요청처리", responseData);
         return ResponseEntity.ok(response);
     }
 

@@ -64,6 +64,9 @@ public class UserServiceTest {
     @Mock
     private ManagerRepository managerRepository;
 
+    @Mock
+    private UserQueryService userQueryService;
+
     private String username;
     private String email;
     private String password;
@@ -158,7 +161,7 @@ public class UserServiceTest {
 
         // when & then
         CustomException exception = assertThrows(CustomException.class,
-                () -> userService.findByUsernameOrElseThrow(username));
+                () -> userQueryService.findByUsernameOrElseThrow(username));
         assertEquals(ExceptionCode.USER_NOT_FOUND, exception.getExceptionCode());
     }
 
