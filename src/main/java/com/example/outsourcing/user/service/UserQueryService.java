@@ -7,6 +7,8 @@ import com.example.outsourcing.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserQueryService {
@@ -32,5 +34,9 @@ public class UserQueryService {
                     return user;
                 })
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

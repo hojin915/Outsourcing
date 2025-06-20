@@ -29,7 +29,7 @@ public class ManagerService {
     @Transactional
     public ManagerResponseDto registerManager(String username, Long taskId, ManagerRequestDto requestDto) {
         // 로그인한 유저
-        User user = userQueryService.findByUsernameOrElseThrow(username);
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
         // 등록하려는 유저
         User targetUser = userRepository.findByIdOrElseThrow(requestDto.getTargetUserId());
