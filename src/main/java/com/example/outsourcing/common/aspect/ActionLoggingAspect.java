@@ -2,6 +2,7 @@ package com.example.outsourcing.common.aspect;
 
 import com.example.outsourcing.activitylog.entity.ActivityLog;
 import com.example.outsourcing.activitylog.service.ActivityLogService;
+import com.example.outsourcing.common.dto.ResponseDto;
 import com.example.outsourcing.common.dto.TargetIdentifiable;
 import com.example.outsourcing.common.entity.AuthUser;
 import jakarta.servlet.http.HttpServletRequest;
@@ -109,14 +110,22 @@ public class ActionLoggingAspect {
     }
 
     private Long extractTargetIdFromResponse(Object responseObject) {
-        if (responseObject instanceof TargetIdentifiable) {
-            Long extractedId = ((TargetIdentifiable) responseObject).getTargetId();
-            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출 결과 확인 : {}", extractedId);
+        Object actualObject = responseObject;
+
+        // responseObject가 ResponseDto인 경우
+        if (responseObject instanceof ResponseDto) {
+            ResponseDto<?> responseDtoWrapper = (ResponseDto<?>) responseObject;
+            actualObject = responseDtoWrapper.getData();
+        }
+
+        if (actualObject instanceof TargetIdentifiable) {
+            Long extractedId = ((TargetIdentifiable) actualObject).getTargetId();
+            log.debug("TargetIdentifiable 인터페이스를 통해 targetId 추출 결과 확인 (실제 객체 타입: {}): {}",
+                    actualObject.getClass().getName(), extractedId);
             return extractedId;
         }
         return null;
     }
-
 
     private String getCurrentLoggedInUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
