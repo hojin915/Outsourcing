@@ -97,7 +97,7 @@ public class UserService {
     @Transactional
     public UserDeleteResponseDto delete(String username, UserDeleteRequestDto request) {
         // 유저가 없을 시 예외처리
-        User user = findByUsernameOrElseThrow(username);
+        User user = userRepository.findByUsernameOrElseThrow(username);
 
         String password = request.getPassword();
 
@@ -110,9 +110,6 @@ public class UserService {
         // 유저가 작성한 task 에 연결된 댓글, 관리자 softDelete
         List<Long> taskIds = taskServiceImpl.findTaskIdsByUserId(user.getId());
         taskServiceImpl.softDeleteTasksConnections(taskIds);
-        // log 관련 문제생기면 직접 repository 참조
-        // managerRepository.softDeleteManagersByTaskIds(taskIds);
-        // commentRepository.softDeleteCommentsByTaskIds(taskIds);
 
         // task, user 마지막에 softDelete
         taskRepository.softDeleteTasksByUserId(Task.Status.TODO, user.getId());
