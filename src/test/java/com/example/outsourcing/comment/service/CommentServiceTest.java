@@ -4,6 +4,7 @@ import com.example.outsourcing.comment.dto.*;
 import com.example.outsourcing.comment.entity.Comment;
 import com.example.outsourcing.comment.repository.CommentRepository;
 import com.example.outsourcing.common.entity.AuthUser;
+import com.example.outsourcing.common.enums.UserRole;
 import com.example.outsourcing.task.entity.Task;
 import com.example.outsourcing.task.repository.TaskRepository;
 import com.example.outsourcing.user.entity.User;
@@ -72,7 +73,7 @@ public class CommentServiceTest {
         // given
         Long taskId = 1L;
 
-        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", USER);
+        User user = new User("test", "test@test.test", "1Q2w3e4r!", "테스트", UserRole.USER);
         Task task = new Task(taskId);
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -177,11 +178,10 @@ public class CommentServiceTest {
 
         // given
         Long taskId = 1L;
-        Long userId = 1L;
         String testSearch = "테스트 검색내용입니다.";
 
         Task task = new Task(taskId);
-        User user = new User(userId);
+        User user = new User("이름", "test@test.test", "1Q2w3e4r!", "name", UserRole.USER);
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> commentPage = new PageImpl<>(List.of());
@@ -208,13 +208,12 @@ public class CommentServiceTest {
     void 댓글_전체_검색_서비스_단위_테스트() {
 
         // given
-        Long userId = 1L;
         String testSearch = "테스트 검색내용입니다.";
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Comment> commentPage = new PageImpl<>(List.of());
 
-        User user = new User(userId);
+        User user = new User("이름", "test@test.test", "1Q2w3e4r!", "name", UserRole.USER);
 
         AuthUser authUser = new AuthUser(
                 user.getId(),
